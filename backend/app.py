@@ -16,12 +16,6 @@ CORS(app)
 # ============================================================
 # FIREGUARD AI EVENT DATA
 # ============================================================
-#
-# IMPORTANT:
-# lat / lng were added so the Live Map can receive
-# the coordinates directly from the backend.
-#
-# ============================================================
 
 EVENTS = [
 
@@ -222,12 +216,6 @@ ALERTS_FILE = os.path.join(
 # ============================================================
 
 def load_alerts():
-    """
-    Load alert state from alerts.json.
-
-    If the file doesn't exist or is invalid,
-    create it using DEFAULT_ALERTS.
-    """
 
     if not os.path.exists(ALERTS_FILE):
 
@@ -266,9 +254,6 @@ def load_alerts():
 # ============================================================
 
 def save_alerts(alerts):
-    """
-    Save current alert state to alerts.json.
-    """
 
     with open(
         ALERTS_FILE,
@@ -285,7 +270,7 @@ def save_alerts(alerts):
 
 
 # ============================================================
-# LOAD ALERTS WHEN SERVER STARTS
+# LOAD ALERTS
 # ============================================================
 
 ALERTS = load_alerts()
@@ -318,15 +303,6 @@ def find_alert(alert_id):
 
 
 def get_temperature_number(temperature):
-    """
-    Convert:
-
-        67.4°C
-
-    into:
-
-        67.4
-    """
 
     try:
 
@@ -346,15 +322,6 @@ def get_temperature_number(temperature):
 
 
 def get_confidence_number(confidence):
-    """
-    Convert:
-
-        94%
-
-    into:
-
-        94
-    """
 
     try:
 
@@ -373,16 +340,10 @@ def get_confidence_number(confidence):
 
 
 # ============================================================
-# ANALYSIS ENGINE
+# EXISTING EVENT ANALYSIS ENGINE
 # ============================================================
 
 def build_analysis(event):
-    """
-    Build a structured FireGuard AI analysis.
-
-    This is currently a rule-based/demo analysis engine.
-    It uses event severity, temperature and confidence.
-    """
 
     severity = event["severity"]
 
@@ -394,16 +355,12 @@ def build_analysis(event):
 
     event_type = event["type"]
 
-    temperature_value = (
-        get_temperature_number(
-            temperature
-        )
+    temperature_value = get_temperature_number(
+        temperature
     )
 
-    confidence_value = (
-        get_confidence_number(
-            confidence
-        )
+    confidence_value = get_confidence_number(
+        confidence
     )
 
 
@@ -427,8 +384,6 @@ def build_analysis(event):
 
         threat_score = 28
 
-
-    # Temperature adjustment
 
     if temperature_value >= 65:
 
@@ -492,7 +447,7 @@ def build_analysis(event):
 
 
     # ========================================================
-    # AI ASSESSMENT
+    # ASSESSMENT
     # ========================================================
 
     if severity == "CRITICAL":
@@ -604,13 +559,7 @@ def build_analysis(event):
         threat_level = "LOW"
 
 
-    # ========================================================
-    # STRUCTURED RESULT
-    # ========================================================
-
     return {
-
-        # Original event values
 
         "event_id":
             event["id"],
@@ -636,17 +585,11 @@ def build_analysis(event):
         "time":
             event["time"],
 
-
-        # Geographic data
-
         "latitude":
             event["lat"],
 
         "longitude":
             event["lng"],
-
-
-        # Analysis values
 
         "priority":
             priority,
@@ -660,9 +603,6 @@ def build_analysis(event):
         "score":
             threat_score,
 
-
-        # Dashboard values
-
         "thermal_signal":
             temperature,
 
@@ -674,9 +614,6 @@ def build_analysis(event):
 
         "ai_confidence":
             confidence,
-
-
-        # Explanation / response
 
         "assessment":
             assessment,
@@ -690,9 +627,6 @@ def build_analysis(event):
         "recommended_response":
             recommendation,
 
-
-        # Numeric values
-
         "temperature_value":
             temperature_value,
 
@@ -700,6 +634,485 @@ def build_analysis(event):
             confidence_value
 
     }
+
+
+# ============================================================
+# FREE-TEXT AI ANALYSIS ENGINE
+# ============================================================
+
+def analyze_situation(
+    situation,
+    region,
+    mode
+):
+
+    text = str(
+        situation or ""
+    ).strip()
+
+    lower_text = text.lower()
+
+    region = (
+        str(region).strip()
+        if region
+        else "Unknown Region"
+    )
+
+    mode = (
+        str(mode).strip()
+        if mode
+        else "thermal"
+    )
+
+
+    # ========================================================
+    # KEYWORD GROUPS
+    # ========================================================
+
+    critical_words = [
+
+        "extreme",
+        "massive",
+        "explosion",
+        "explosive",
+        "rapidly increasing",
+        "rapid increase",
+        "large fire",
+        "major fire",
+        "engulfed",
+        "spreading rapidly",
+        "multiple structures",
+        "dense population",
+        "densely populated",
+        "evacuation",
+        "smoke plume",
+        "heavy smoke",
+        "severe fire",
+        "uncontrolled fire",
+        "wildfire spreading",
+        "building engulfed"
+
+    ]
+
+
+    high_words = [
+
+        "large thermal",
+        "strong thermal",
+        "high temperature",
+        "high thermal",
+        "industrial fire",
+        "industrial facility",
+        "refinery",
+        "chemical plant",
+        "factory fire",
+        "warehouse fire",
+        "visible smoke",
+        "fire detected",
+        "active fire",
+        "spreading fire",
+        "thermal spike",
+        "rapid thermal",
+        "high heat",
+        "hotspot"
+
+    ]
+
+
+    moderate_words = [
+
+        "thermal anomaly",
+        "thermal activity",
+        "heat anomaly",
+        "elevated temperature",
+        "elevated thermal",
+        "small fire",
+        "localized fire",
+        "localized thermal",
+        "unusual heat",
+        "unusual thermal",
+        "possible fire",
+        "possible thermal",
+        "thermal signal",
+        "heat detection",
+        "temperature anomaly"
+
+    ]
+
+
+    negative_phrases = [
+
+        "no fire",
+        "no unusual thermal",
+        "no unusual heat",
+        "no smoke",
+        "no anomaly",
+        "nothing detected",
+        "no active fire",
+        "no thermal anomaly",
+        "normal conditions",
+        "normal clear day",
+        "clear day",
+        "stable conditions",
+        "routine monitoring",
+        "expected conditions"
+
+    ]
+
+
+    # ========================================================
+    # COUNT SIGNALS
+    # ========================================================
+
+    critical_hits = sum(
+        1
+        for word in critical_words
+        if word in lower_text
+    )
+
+    high_hits = sum(
+        1
+        for word in high_words
+        if word in lower_text
+    )
+
+    moderate_hits = sum(
+        1
+        for word in moderate_words
+        if word in lower_text
+    )
+
+    negative_hits = sum(
+        1
+        for phrase in negative_phrases
+        if phrase in lower_text
+    )
+
+
+    # ========================================================
+    # IMPORTANT NEGATIVE SIGNAL OVERRIDE
+    # ========================================================
+
+    has_negative_signal = (
+        negative_hits > 0
+        and not any(
+            phrase in lower_text
+            for phrase in [
+                "but there is a fire",
+                "but fire detected",
+                "despite no smoke",
+                "fire is present"
+            ]
+        )
+    )
+
+
+    # ========================================================
+    # DETERMINE SEVERITY
+    # ========================================================
+
+    if has_negative_signal and critical_hits == 0:
+
+        severity = "LOW"
+
+        threat_score = 15
+
+        temperature = "24.0°C"
+
+        confidence = "93%"
+
+        event_type = "Normal Conditions"
+
+
+    elif critical_hits >= 2:
+
+        severity = "CRITICAL"
+
+        threat_score = 95
+
+        temperature = "82.0°C"
+
+        confidence = "95%"
+
+        event_type = "Critical Thermal Event"
+
+
+    elif critical_hits == 1:
+
+        severity = "CRITICAL"
+
+        threat_score = 90
+
+        temperature = "78.0°C"
+
+        confidence = "91%"
+
+        event_type = "Critical Thermal Event"
+
+
+    elif high_hits >= 2:
+
+        severity = "HIGH"
+
+        threat_score = 82
+
+        temperature = "70.0°C"
+
+        confidence = "89%"
+
+        event_type = "High-Risk Thermal Event"
+
+
+    elif high_hits == 1:
+
+        severity = "HIGH"
+
+        threat_score = 74
+
+        temperature = "65.0°C"
+
+        confidence = "85%"
+
+        event_type = "High-Risk Thermal Event"
+
+
+    elif moderate_hits >= 1:
+
+        severity = "MODERATE"
+
+        threat_score = 54
+
+        temperature = "56.0°C"
+
+        confidence = "78%"
+
+        event_type = "Thermal Anomaly"
+
+
+    else:
+
+        severity = "LOW"
+
+        threat_score = 25
+
+        temperature = "30.0°C"
+
+        confidence = "72%"
+
+        event_type = "Low-Risk Thermal Signal"
+
+
+    # ========================================================
+    # CREATE TEMPORARY EVENT
+    # ========================================================
+
+    temporary_event = {
+
+        "id":
+            "AI-TEXT",
+
+        "type":
+            event_type,
+
+        "region":
+            region,
+
+        "lat":
+            0.0,
+
+        "lng":
+            0.0,
+
+        "temperature":
+            temperature,
+
+        "confidence":
+            confidence,
+
+        "severity":
+            severity,
+
+        "status":
+            "AI ANALYSIS",
+
+        "time":
+            datetime.now().strftime(
+                "%H:%M:%S"
+            )
+
+    }
+
+
+    # ========================================================
+    # BUILD STANDARD ANALYSIS
+    # ========================================================
+
+    analysis = build_analysis(
+        temporary_event
+    )
+
+
+    # ========================================================
+    # OVERRIDE SCORE WITH TEXT SCORE
+    # ========================================================
+
+    analysis["threat_score"] = (
+        threat_score
+    )
+
+    analysis["score"] = (
+        threat_score
+    )
+
+
+    analysis["temperature_value"] = (
+        get_temperature_number(
+            temperature
+        )
+    )
+
+    analysis["confidence_value"] = (
+        get_confidence_number(
+            confidence
+        )
+    )
+
+
+    # ========================================================
+    # TEXT-SPECIFIC EXPLANATION
+    # ========================================================
+
+    if severity == "LOW":
+
+        analysis["assessment"] = (
+            f"Low-risk conditions reported in "
+            f"{region}. No strong indicators of active "
+            f"thermal danger were identified."
+        )
+
+        analysis["explanation"] = (
+            f"The submitted situation was analyzed for "
+            f"thermal, fire, smoke, industrial and escalation "
+            f"indicators. The available description does not "
+            f"contain strong evidence of an active high-risk "
+            f"thermal event in {region}."
+        )
+
+        analysis["recommendation"] = (
+            "Maintain routine monitoring and continue "
+            "normal observation of the region."
+        )
+
+        analysis["recommended_response"] = (
+            analysis["recommendation"]
+        )
+
+        analysis["priority"] = "LOW"
+
+        analysis["threat_level"] = "LOW"
+
+
+    elif severity == "MODERATE":
+
+        analysis["assessment"] = (
+            f"Moderate thermal risk identified in "
+            f"{region}. Additional observation is recommended."
+        )
+
+        analysis["explanation"] = (
+            f"The submitted situation contains indicators "
+            f"of unusual or elevated thermal activity. "
+            f"The evidence is not strong enough to classify "
+            f"the situation as an immediate critical threat."
+        )
+
+        analysis["recommendation"] = (
+            "Continue monitoring, verify the location and "
+            "compare subsequent thermal observations."
+        )
+
+        analysis["recommended_response"] = (
+            analysis["recommendation"]
+        )
+
+        analysis["priority"] = "MONITOR"
+
+        analysis["threat_level"] = "MODERATE"
+
+
+    elif severity == "HIGH":
+
+        analysis["assessment"] = (
+            f"High-risk thermal activity reported in "
+            f"{region}. Enhanced verification is recommended."
+        )
+
+        analysis["explanation"] = (
+            f"The submitted situation contains significant "
+            f"thermal or fire-related indicators. The signal "
+            f"should be investigated and monitored for escalation."
+        )
+
+        analysis["recommendation"] = (
+            "Prioritize verification of the location, "
+            "continue monitoring and investigate for active "
+            "fire or industrial hazards."
+        )
+
+        analysis["recommended_response"] = (
+            analysis["recommendation"]
+        )
+
+        analysis["priority"] = "HIGH"
+
+        analysis["threat_level"] = "HIGH"
+
+
+    else:
+
+        analysis["assessment"] = (
+            f"Critical thermal/fire risk identified in "
+            f"{region}. Immediate operational verification "
+            f"is recommended."
+        )
+
+        analysis["explanation"] = (
+            f"The submitted situation contains multiple "
+            f"high-severity indicators such as extreme heat, "
+            f"fire, smoke, rapid spread or significant exposure. "
+            f"The situation should be treated as a critical "
+            f"operational priority."
+        )
+
+        analysis["recommendation"] = (
+            "Prioritize immediate field verification, "
+            "confirm the presence of active fire or hazardous "
+            "thermal activity, and maintain continuous monitoring."
+        )
+
+        analysis["recommended_response"] = (
+            analysis["recommendation"]
+        )
+
+        analysis["priority"] = "IMMEDIATE"
+
+        analysis["threat_level"] = "CRITICAL"
+
+
+    # ========================================================
+    # INCLUDE USER INPUT
+    # ========================================================
+
+    analysis["situation"] = text
+
+    analysis["input_region"] = region
+
+    analysis["mode"] = mode
+
+    analysis["analysis_type"] = "FREE_TEXT"
+
+
+    return analysis
 
 
 # ============================================================
@@ -730,6 +1143,8 @@ def home():
             "GET /api/health",
 
             "GET /api/events",
+
+            "GET /api/events/<event_id>",
 
             "GET /api/alerts",
 
@@ -805,8 +1220,9 @@ def get_events():
 )
 def get_single_event(event_id):
 
-    event = find_event(event_id)
-
+    event = find_event(
+        event_id
+    )
 
     if event is None:
 
@@ -873,7 +1289,6 @@ def acknowledge_alert(alert_id):
         alert_id
     )
 
-
     if alert is None:
 
         return jsonify({
@@ -908,7 +1323,6 @@ def acknowledge_alert(alert_id):
 
     alert["status"] = "ACKNOWLEDGED"
 
-
     save_alerts(
         ALERTS
     )
@@ -942,7 +1356,6 @@ def reset_alert(alert_id):
         alert_id
     )
 
-
     if alert is None:
 
         return jsonify({
@@ -960,7 +1373,6 @@ def reset_alert(alert_id):
 
 
     alert["status"] = "ACTIVE"
-
 
     save_alerts(
         ALERTS
@@ -1000,9 +1412,27 @@ def analyze():
         "event_id"
     )
 
+    situation = data.get(
+        "situation",
+        ""
+    )
+
+    region = data.get(
+        "region",
+        "Unknown Region"
+    )
+
+    mode = data.get(
+        "mode",
+        "thermal"
+    )
+
 
     # ========================================================
-    # FIND EVENT
+    # EVENT-BASED ANALYSIS
+    #
+    # If the caller deliberately supplies event_id,
+    # preserve the original event analysis functionality.
     # ========================================================
 
     if event_id:
@@ -1010,7 +1440,6 @@ def analyze():
         event = find_event(
             event_id
         )
-
 
         if event is None:
 
@@ -1027,20 +1456,72 @@ def analyze():
 
             }), 404
 
+
+        analysis = build_analysis(
+            event
+        )
+
+        analysis["analysis_type"] = (
+            "EVENT"
+        )
+
+        analysis["situation"] = (
+            str(situation).strip()
+        )
+
+        analysis["input_region"] = (
+            str(region).strip()
+        )
+
+        analysis["mode"] = (
+            str(mode).strip()
+        )
+
+
+    # ========================================================
+    # FREE-TEXT ANALYSIS
+    #
+    # This is the important fix.
+    #
+    # Previously:
+    #
+    #     event = EVENTS[0]
+    #
+    # which meant every free-text request analyzed
+    # FG-001 and therefore returned the same Critical result.
+    #
+    # Now the submitted situation is actually analyzed.
+    # ========================================================
+
     else:
 
-        # Default event
+        situation_text = (
+            str(situation).strip()
+        )
 
-        event = EVENTS[0]
+
+        if not situation_text:
+
+            return jsonify({
+
+                "status":
+                    "error",
+
+                "message":
+                    "Please provide a situation to analyze."
+
+            }), 400
 
 
-    # ========================================================
-    # BUILD ANALYSIS
-    # ========================================================
+        analysis = analyze_situation(
 
-    analysis = build_analysis(
-        event
-    )
+            situation_text,
+
+            region,
+
+            mode
+
+        )
 
 
     # ========================================================
@@ -1085,9 +1566,6 @@ if __name__ == "__main__":
     )
 
     print("")
-
-    # Use the PORT supplied by the hosting platform.
-    # If no PORT exists, use 5000 for local development.
 
     port = int(
         os.environ.get(

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -202,12 +203,17 @@
             padding: 17px;
             font-size: 15px;
             outline: none;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         textarea {
             min-height: 190px;
             resize: vertical;
             line-height: 1.6;
+            display: block;
+            cursor: text;
+            pointer-events: auto;
+            user-select: text;
         }
 
         textarea:focus,
@@ -637,7 +643,13 @@
                         DESCRIBE THE SITUATION
                     </label>
 
-                    <textarea id="situation">Analyze a critical thermal anomaly detected near an industrial area.</textarea>
+                    <textarea
+                        id="situation"
+                        name="situation"
+                        placeholder="Describe the thermal event, location, industrial activity, or emergency situation..."
+                        autocomplete="off"
+                        spellcheck="true"
+                    >Analyze a critical thermal anomaly detected near an industrial area.</textarea>
 
                 </div>
 
@@ -705,9 +717,9 @@
 
 
                 <button
+                    type="button"
                     class="run-button"
                     id="runButton"
-                    onclick="runAnalysis()"
                 >
                     RUN AI ANALYSIS →
                 </button>
@@ -721,29 +733,33 @@
                 <div class="quick-buttons">
 
                     <button
+                        type="button"
                         class="quick-button"
-                        onclick="quickAnalysis('thermal')"
+                        data-mode="thermal"
                     >
                         🔥 Analyze a critical thermal anomaly
                     </button>
 
                     <button
+                        type="button"
                         class="quick-button"
-                        onclick="quickAnalysis('industrial')"
+                        data-mode="industrial"
                     >
                         🏭 Assess industrial fire risk
                     </button>
 
                     <button
+                        type="button"
                         class="quick-button"
-                        onclick="quickAnalysis('population')"
+                        data-mode="population"
                     >
                         👥 Estimate population exposure
                     </button>
 
                     <button
+                        type="button"
                         class="quick-button"
-                        onclick="quickAnalysis('response')"
+                        data-mode="response"
                     >
                         🚨 Recommend emergency response
                     </button>
@@ -990,6 +1006,14 @@
          * FireGuard AI Analyst
          */
 
+        /*
+         * IMPORTANT:
+         *
+         * This must point to your deployed backend.
+         *
+         * If your Flask backend is deployed at a different
+         * Render URL, replace the URL below.
+         */
         const API_BASE = "http://127.0.0.1:5000";
 
 
@@ -1015,15 +1039,40 @@
 
 
         /*
+         * Get elements
+         */
+
+        const situationInput =
+            document.getElementById("situation");
+
+        const regionInput =
+            document.getElementById("region");
+
+        const modeInput =
+            document.getElementById("mode");
+
+        const runButton =
+            document.getElementById("runButton");
+
+        const engineStatus =
+            document.getElementById("engineStatus");
+
+        const errorBox =
+            document.getElementById("errorBox");
+
+
+        /*
          * Quick analysis
          */
 
         function quickAnalysis(mode) {
 
-            document.getElementById("mode").value = mode;
+            modeInput.value = mode;
 
-            document.getElementById("situation").value =
+            situationInput.value =
                 quickRequests[mode];
+
+            situationInput.focus();
 
             runAnalysis();
         }
@@ -1174,9 +1223,7 @@
 
 
             /*
-             * IMPORTANT:
-             *
-             * Backend response is:
+             * Backend response can be:
              *
              * {
              *     status: "success",
@@ -1212,7 +1259,8 @@
 
             document.getElementById(
                 "threatLevel"
-            ).textContent = readable(threat);
+            ).textContent =
+                readable(threat);
 
 
             /*
@@ -1407,16 +1455,6 @@
 
         async function runAnalysis() {
 
-            const button =
-                document.getElementById("runButton");
-
-            const engineStatus =
-                document.getElementById("engineStatus");
-
-            const errorBox =
-                document.getElementById("errorBox");
-
-
             /*
              * Clear previous error.
              */
@@ -1426,11 +1464,49 @@
 
 
             /*
+             * Get user input BEFORE disabling anything.
+             */
+
+            const situation =
+                situationInput.value.trim();
+
+
+            const region =
+                regionInput.value;
+
+
+            const mode =
+                modeInput.value;
+
+
+            /*
+             * Do not run empty requests.
+             */
+
+            if (!situation) {
+
+                errorBox.textContent =
+                    "Please describe the situation before running the analysis.";
+
+                errorBox.classList.add("show");
+
+                engineStatus.textContent =
+                    "WAITING FOR INPUT";
+
+                situationInput.focus();
+
+                return;
+            }
+
+
+            /*
              * Disable button.
              */
 
-            button.disabled = true;
-            button.textContent = "ANALYZING...";
+            runButton.disabled = true;
+
+            runButton.textContent =
+                "ANALYZING...";
 
             engineStatus.textContent =
                 "ANALYZING";
@@ -1438,31 +1514,8 @@
 
             try {
 
-                const situation =
-                    document
-                        .getElementById("situation")
-                        .value
-                        .trim();
-
-
-                const region =
-                    document
-                        .getElementById("region")
-                        .value;
-
-
-                const mode =
-                    document
-                        .getElementById("mode")
-                        .value;
-
-
                 /*
                  * Your tested backend event.
-                 *
-                 * We know this works:
-                 *
-                 * FG-001
                  */
 
                 const eventId = "FG-001";
@@ -1494,11 +1547,29 @@
 
 
                 /*
-                 * Read JSON.
+                 * Read response safely.
                  */
 
-                const data =
-                    await response.json();
+                let data = {};
+
+                const contentType =
+                    response.headers.get("content-type") || "";
+
+                if (contentType.includes("application/json")) {
+
+                    data =
+                        await response.json();
+
+                } else {
+
+                    const text =
+                        await response.text();
+
+                    data = {
+                        message: text
+                    };
+
+                }
 
 
                 console.log(
@@ -1516,7 +1587,7 @@
                     throw new Error(
                         data.message ||
                         data.error ||
-                        "AI analysis failed."
+                        `AI analysis failed with HTTP ${response.status}.`
                     );
 
                 }
@@ -1572,9 +1643,9 @@
 
             finally {
 
-                button.disabled = false;
+                runButton.disabled = false;
 
-                button.textContent =
+                runButton.textContent =
                     "RUN AI ANALYSIS →";
 
             }
@@ -1583,15 +1654,72 @@
 
 
         /*
+         * Connect RUN button.
+         *
+         * This avoids relying on inline onclick handlers.
+         */
+
+        runButton.addEventListener(
+            "click",
+            runAnalysis
+        );
+
+
+        /*
+         * Connect quick analysis buttons.
+         */
+
+        document
+            .querySelectorAll(".quick-button")
+            .forEach((button) => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const mode =
+                            button.dataset.mode;
+
+                        quickAnalysis(mode);
+
+                    }
+                );
+
+            });
+
+
+        /*
+         * Allow Ctrl + Enter inside textarea
+         * to run the analysis.
+         */
+
+        situationInput.addEventListener(
+            "keydown",
+            (event) => {
+
+                if (
+                    event.ctrlKey &&
+                    event.key === "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    runAnalysis();
+
+                }
+
+            }
+        );
+
+
+        /*
          * Check backend.
          */
 
         async function checkBackend() {
 
-            const engineStatus =
-                document.getElementById(
-                    "engineStatus"
-                );
+            engineStatus.textContent =
+                "CHECKING BACKEND";
 
             try {
 
@@ -1631,12 +1759,46 @@
 
 
         /*
+         * Load a query passed from index.html.
+         *
+         * This allows the landing-page analyst box
+         * to send its text to this page.
+         */
+
+        function loadSavedAnalystQuery() {
+
+            const savedQuery =
+                sessionStorage.getItem(
+                    "fireguardAnalystQuery"
+                );
+
+
+            if (savedQuery) {
+
+                situationInput.value =
+                    savedQuery;
+
+                sessionStorage.removeItem(
+                    "fireguardAnalystQuery"
+                );
+
+                situationInput.focus();
+
+            }
+
+        }
+
+
+        /*
          * Start page.
          */
+
+        loadSavedAnalystQuery();
 
         checkBackend();
 
     </script>
 
 </body>
+
 </html>

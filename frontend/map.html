@@ -1,0 +1,4203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FireGuard AI — Live Map</title>
+
+    <!-- Leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        /* =========================================================
+           RESET
+        ========================================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #050505;
+            color: #f5f5f5;
+            font-family: "Inter", Arial, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        button,
+        a {
+            font-family: inherit;
+        }
+
+
+        /* =========================================================
+           NAVBAR
+        ========================================================= */
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+
+            height: 86px;
+
+            z-index: 10000;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 5.5%;
+
+            background: rgba(5, 5, 5, 0.97);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            color: #fff;
+            text-decoration: none;
+
+            flex-shrink: 0;
+        }
+
+        .brand-fire {
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .brand-name span {
+            color: #ff3828;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+
+            margin-left: auto;
+            margin-right: 45px;
+        }
+
+        .nav-links a {
+            color: #686868;
+            text-decoration: none;
+
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+
+            transition: color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            padding: 13px 22px;
+
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 30px;
+
+            color: #ddd;
+
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+
+            border-radius: 50%;
+
+            background: #20e878;
+
+            box-shadow:
+                0 0 8px rgba(32,232,120,0.7);
+
+            animation: systemPulse 2s infinite;
+        }
+
+        @keyframes systemPulse {
+            0% {
+                box-shadow: 0 0 4px rgba(32,232,120,0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 18px rgba(32,232,120,1);
+            }
+
+            100% {
+                box-shadow: 0 0 4px rgba(32,232,120,0.4);
+            }
+        }
+
+
+        /* =========================================================
+           PAGE
+        ========================================================= */
+
+        .page {
+            padding-top: 86px;
+            min-height: 100vh;
+
+            background:
+                radial-gradient(
+                    circle at 15% 35%,
+                    rgba(255,120,0,0.07),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 90% 25%,
+                    rgba(255,40,20,0.07),
+                    transparent 30%
+                );
+        }
+
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .map-header {
+            padding: 82px 5.5% 50px;
+
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            margin-bottom: 20px;
+
+            color: #ff9900;
+
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 4px;
+        }
+
+        .eyebrow-line {
+            width: 40px;
+            height: 2px;
+
+            background: #ff9900;
+        }
+
+        .map-title {
+            font-size: clamp(52px, 6vw, 92px);
+
+            line-height: 0.95;
+
+            font-weight: 900;
+            letter-spacing: -4px;
+
+            text-transform: uppercase;
+        }
+
+        .map-title span {
+            color: #ff3828;
+        }
+
+        .map-subtitle {
+            max-width: 780px;
+
+            margin-top: 25px;
+
+            color: #777;
+
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+
+        /* =========================================================
+           MAIN MAP SECTION
+        ========================================================= */
+
+        .map-section {
+            padding: 48px 5.5% 80px;
+        }
+
+        .map-layout {
+            width: 100%;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                390px;
+
+            gap: 20px;
+
+            align-items: stretch;
+        }
+
+
+        /* =========================================================
+           MAP WRAPPER
+        ========================================================= */
+
+        .map-wrapper {
+            position: relative;
+
+            width: 100%;
+            height: 650px;
+            min-height: 0;
+
+            overflow: hidden;
+
+            background: #080808;
+
+            border: 1px solid rgba(255,255,255,0.13);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+
+            background: #090909;
+        }
+
+
+        /* =========================================================
+           MAP TOP BAR
+        ========================================================= */
+
+        .map-toolbar {
+            position: absolute;
+
+            top: 18px;
+            left: 18px;
+            right: 18px;
+
+            z-index: 800;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            pointer-events: none;
+        }
+
+        .map-label,
+        .live-indicator {
+            pointer-events: auto;
+
+            padding: 10px 14px;
+
+            background: rgba(5,5,5,0.94);
+
+            border: 1px solid rgba(255,255,255,0.12);
+
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .map-label {
+            color: #aaa;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            color: #20e878;
+        }
+
+        .live-indicator::before {
+            content: "";
+
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #20e878;
+
+            box-shadow:
+                0 0 10px #20e878;
+        }
+
+        .live-indicator.loading {
+            color: #ffd000;
+        }
+
+        .live-indicator.loading::before {
+            background: #ffd000;
+            box-shadow: 0 0 10px #ffd000;
+        }
+
+        .live-indicator.error {
+            color: #ff3828;
+        }
+
+        .live-indicator.error::before {
+            background: #ff3828;
+            box-shadow: 0 0 10px #ff3828;
+        }
+
+
+        /* =========================================================
+           CLUSTER NOTICE
+        ========================================================= */
+
+        .cluster-notice {
+            position: absolute;
+
+            left: 18px;
+            top: 68px;
+
+            z-index: 800;
+
+            display: none;
+
+            padding: 8px 12px;
+
+            background: rgba(5,5,5,0.94);
+
+            border: 1px solid rgba(255,153,0,0.4);
+
+            color: #ffb000;
+
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+        }
+
+        .cluster-notice.show {
+            display: block;
+        }
+
+
+        /* =========================================================
+           LAYER CONTROLS
+        ========================================================= */
+
+        .layer-controls {
+            position: absolute;
+
+            left: 18px;
+            bottom: 18px;
+
+            z-index: 800;
+
+            display: flex;
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            max-width: calc(100% - 210px);
+        }
+
+        .layer-btn {
+            padding: 11px 15px;
+
+            border: 1px solid rgba(255,255,255,0.15);
+
+            background: rgba(5,5,5,0.94);
+
+            color: #777;
+
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.7px;
+
+            cursor: pointer;
+
+            transition:
+                color 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .layer-btn:hover {
+            color: #fff;
+            border-color: rgba(255,120,0,0.6);
+        }
+
+        .layer-btn.active {
+            color: #fff;
+
+            border-color: #ff3828;
+
+            background: rgba(255,56,40,0.12);
+        }
+
+
+        /* =========================================================
+           LEGEND
+        ========================================================= */
+
+        .map-legend {
+            position: absolute;
+
+            right: 18px;
+            bottom: 18px;
+
+            z-index: 800;
+
+            min-width: 155px;
+
+            padding: 15px;
+
+            background: rgba(5,5,5,0.95);
+
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .legend-title {
+            margin-bottom: 12px;
+
+            color: #777;
+
+            font-size: 9px;
+            letter-spacing: 2px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+
+            gap: 9px;
+
+            margin-bottom: 8px;
+
+            color: #aaa;
+
+            font-size: 10px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-dot {
+            width: 9px;
+            height: 9px;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+        }
+
+        .legend-critical {
+            background: #ff2f1f;
+            box-shadow: 0 0 8px #ff2f1f;
+        }
+
+        .legend-high {
+            background: #ff7800;
+            box-shadow: 0 0 8px #ff7800;
+        }
+
+        .legend-moderate {
+            background: #ffd000;
+            box-shadow: 0 0 8px #ffd000;
+        }
+
+        .legend-low {
+            background: #35e47b;
+            box-shadow: 0 0 8px #35e47b;
+        }
+
+
+        /* =========================================================
+           LOADING
+        ========================================================= */
+
+        .loading-state {
+            position: absolute;
+            inset: 0;
+
+            z-index: 1200;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            pointer-events: none;
+
+            background: rgba(5,5,5,0.30);
+        }
+
+        .loading-state.hidden {
+            display: none;
+        }
+
+        .loading-box {
+            padding: 18px 24px;
+
+            background: rgba(5,5,5,0.96);
+
+            border: 1px solid rgba(255,255,255,0.12);
+
+            color: #aaa;
+
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+
+        /* =========================================================
+           EVENT PANEL
+        ========================================================= */
+
+        .event-panel {
+            width: 100%;
+            height: 650px;
+
+            padding: 30px;
+
+            border: 1px solid rgba(255,255,255,0.13);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,30,20,0.07),
+                    rgba(0,0,0,0.3)
+                );
+
+            display: flex;
+            flex-direction: column;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .panel-label {
+            margin-bottom: 22px;
+
+            color: #ff9900;
+
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 3px;
+        }
+
+        .selected-id {
+            margin-bottom: 12px;
+
+            color: #fff;
+
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+
+        .selected-status {
+            display: inline-flex;
+            align-items: center;
+
+            width: fit-content;
+
+            margin-bottom: 26px;
+
+            padding: 7px 11px;
+
+            border: 1px solid rgba(255,56,40,0.5);
+
+            color: #ff3828;
+
+            font-size: 9px;
+            letter-spacing: 2px;
+        }
+
+        .selected-location {
+            margin-bottom: 24px;
+
+            color: #fff;
+
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .event-description {
+            margin-bottom: 25px;
+
+            color: #888;
+
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .event-description strong {
+            color: #fff;
+        }
+
+        .critical {
+            color: #ff2f1f !important;
+        }
+
+        .high {
+            color: #ff7800 !important;
+        }
+
+        .moderate {
+            color: #ffd000 !important;
+        }
+
+        .low {
+            color: #35e47b !important;
+        }
+
+
+        /* =========================================================
+           PANEL METRICS
+        ========================================================= */
+
+        .panel-metrics {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 10px;
+
+            margin-top: auto;
+        }
+
+        .metric {
+            min-width: 0;
+
+            padding: 16px;
+
+            background: rgba(255,255,255,0.015);
+
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .metric-label {
+            display: block;
+
+            margin-bottom: 9px;
+
+            color: #555;
+
+            font-size: 8px;
+            letter-spacing: 2px;
+        }
+
+        .metric-value {
+            display: block;
+
+            color: #fff;
+
+            font-size: 17px;
+            font-weight: 700;
+
+            word-break: break-word;
+        }
+
+        .metric-value.temperature {
+            color: #ff3828;
+        }
+
+
+        /* =========================================================
+           INVESTIGATE BUTTON
+        ========================================================= */
+
+        .investigate-btn {
+            width: 100%;
+
+            margin-top: 12px;
+
+            padding: 16px;
+
+            border: 1px solid #ff3828;
+
+            background: rgba(255,56,40,0.08);
+
+            color: #fff;
+
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .investigate-btn:hover {
+            background: #ff3828;
+            color: #fff;
+        }
+
+
+        /* =========================================================
+           SUMMARY
+        ========================================================= */
+
+        .map-info {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 12px;
+
+            margin-top: 20px;
+        }
+
+        .info-card {
+            padding: 22px;
+
+            background: #080808;
+
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-label {
+            margin-bottom: 10px;
+
+            color: #555;
+
+            font-size: 9px;
+            letter-spacing: 2px;
+        }
+
+        .info-value {
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .info-value.red {
+            color: #ff3828;
+        }
+
+        .info-value.orange {
+            color: #ff8a00;
+        }
+
+        .info-value.green {
+            color: #20e878;
+        }
+
+
+        /* =========================================================
+           LEAFLET
+        ========================================================= */
+
+        .leaflet-container {
+            font-family: "Inter", Arial, sans-serif;
+        }
+
+        /*
+            IMPORTANT:
+            Move Leaflet zoom buttons below our top toolbar.
+            This prevents the + / - controls from sitting on top
+            of INDIA / LIVE MONITORING.
+        */
+
+        .leaflet-top.leaflet-left {
+            top: 72px;
+            left: 18px;
+        }
+
+        .leaflet-control-zoom {
+            margin: 0 !important;
+
+            border: 1px solid rgba(255,255,255,0.12) !important;
+
+            box-shadow: none !important;
+        }
+
+        .leaflet-control-zoom a {
+            width: 32px !important;
+            height: 32px !important;
+            line-height: 32px !important;
+
+            background: #090909 !important;
+
+            color: #aaa !important;
+
+            border-bottom:
+                1px solid rgba(255,255,255,0.1) !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background: #181818 !important;
+            color: #fff !important;
+        }
+
+        .leaflet-control-attribution {
+            background: rgba(0,0,0,0.75) !important;
+
+            color: #666 !important;
+
+            font-size: 8px;
+        }
+
+        .leaflet-control-attribution a {
+            color: #888 !important;
+        }
+
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            background: #0b0b0b;
+
+            color: #eee;
+
+            border:
+                1px solid rgba(255,255,255,0.12);
+
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.6);
+        }
+
+        .leaflet-popup-content {
+            margin: 18px;
+
+            min-width: 210px;
+
+            font-family:
+                "Inter",
+                Arial,
+                sans-serif;
+        }
+
+        .leaflet-tooltip {
+            background: #080808 !important;
+            color: #fff !important;
+
+            border: 1px solid rgba(255,255,255,0.15) !important;
+
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5) !important;
+
+            font-family: "Inter", Arial, sans-serif;
+
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .leaflet-tooltip::before {
+            border-top-color: #080808 !important;
+        }
+
+
+        /* =========================================================
+           POPUP
+        ========================================================= */
+
+        .popup-title {
+            margin-bottom: 10px;
+
+            color: #ff3828;
+
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .popup-text {
+            color: #888;
+
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .popup-text strong {
+            color: #fff;
+        }
+
+
+        /* =========================================================
+           EVENT MARKERS
+           
+           KEY FIX:
+           There are NO permanent labels under every marker.
+           Only selected marker gets a label.
+        ========================================================= */
+
+        .fire-marker {
+            position: relative;
+
+            width: 30px;
+            height: 30px;
+
+            pointer-events: auto;
+        }
+
+        .fire-marker-core {
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            width: 13px;
+            height: 13px;
+
+            transform:
+                translate(-50%, -50%);
+
+            border-radius: 50%;
+
+            background: var(--marker-color);
+
+            border:
+                2px solid rgba(255,255,255,0.95);
+
+            box-shadow:
+                0 0 10px var(--marker-color),
+                0 0 22px var(--marker-color);
+        }
+
+        .fire-marker-ring {
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            width: 22px;
+            height: 22px;
+
+            transform:
+                translate(-50%, -50%);
+
+            border-radius: 50%;
+
+            border:
+                1px solid var(--marker-color);
+
+            opacity: 0.6;
+
+            animation:
+                markerPulse 2.2s infinite;
+        }
+
+        .fire-marker.critical .fire-marker-ring {
+            animation-duration: 1.3s;
+        }
+
+        /*
+            Selected marker becomes bigger and more visible.
+        */
+
+        .fire-marker.selected .fire-marker-core {
+            width: 16px;
+            height: 16px;
+
+            border-width: 2px;
+
+            box-shadow:
+                0 0 12px var(--marker-color),
+                0 0 28px var(--marker-color),
+                0 0 45px rgba(255,255,255,0.12);
+        }
+
+        .fire-marker.selected .fire-marker-ring {
+            width: 28px;
+            height: 28px;
+
+            opacity: 0.9;
+        }
+
+        .fire-marker-label {
+            position: absolute;
+
+            left: 50%;
+            top: 100%;
+
+            transform: translateX(-50%);
+
+            margin-top: 7px;
+
+            white-space: nowrap;
+
+            padding: 4px 7px;
+
+            background: rgba(0,0,0,0.92);
+
+            border:
+                1px solid var(--marker-color);
+
+            color: #fff;
+
+            font-size: 8px;
+            font-weight: 800;
+
+            letter-spacing: 0.8px;
+
+            pointer-events: none;
+        }
+
+        @keyframes markerPulse {
+            0% {
+                transform:
+                    translate(-50%, -50%)
+                    scale(0.65);
+
+                opacity: 0.75;
+            }
+
+            70% {
+                transform:
+                    translate(-50%, -50%)
+                    scale(1.5);
+
+                opacity: 0;
+            }
+
+            100% {
+                transform:
+                    translate(-50%, -50%)
+                    scale(1.5);
+
+                opacity: 0;
+            }
+        }
+
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        footer {
+            border-top:
+                1px solid rgba(255,255,255,0.08);
+
+            padding: 35px 5.5%;
+
+            color: #444;
+
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1200px) {
+
+            .nav-links {
+                gap: 20px;
+                margin-right: 25px;
+            }
+
+            .map-layout {
+                grid-template-columns:
+                    minmax(0, 1fr)
+                    350px;
+            }
+
+            .event-panel {
+                padding: 25px;
+            }
+        }
+
+
+        @media (max-width: 1050px) {
+
+            .navbar {
+                padding: 0 30px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .map-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .map-wrapper {
+                height: 620px;
+            }
+
+            .event-panel {
+                height: auto;
+                min-height: 520px;
+            }
+
+            .panel-metrics {
+                margin-top: 25px;
+            }
+
+            .map-info {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+
+
+        @media (max-width: 760px) {
+
+            .navbar {
+                height: 76px;
+                padding: 0 20px;
+            }
+
+            .page {
+                padding-top: 76px;
+            }
+
+            .brand-fire {
+                font-size: 27px;
+            }
+
+            .brand-name {
+                font-size: 18px;
+            }
+
+            .system-status {
+                padding: 10px 13px;
+                font-size: 9px;
+            }
+
+            .map-header {
+                padding: 58px 20px 35px;
+            }
+
+            .eyebrow {
+                font-size: 9px;
+                letter-spacing: 3px;
+            }
+
+            .map-title {
+                font-size: 50px;
+                letter-spacing: -2px;
+            }
+
+            .map-subtitle {
+                font-size: 14px;
+                line-height: 1.7;
+            }
+
+            .map-section {
+                padding:
+                    25px 20px 50px;
+            }
+
+            .map-wrapper {
+                height: 560px;
+            }
+
+            .event-panel {
+                min-height: 520px;
+                padding: 24px;
+            }
+
+            .selected-id {
+                font-size: 36px;
+            }
+
+            .map-toolbar {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+            }
+
+            .map-label,
+            .live-indicator {
+                padding: 8px 10px;
+                font-size: 8px;
+            }
+
+            .cluster-notice {
+                left: 12px;
+                top: 58px;
+            }
+
+            .layer-controls {
+                left: 12px;
+                bottom: 12px;
+
+                max-width:
+                    calc(100% - 24px);
+            }
+
+            .layer-btn {
+                padding:
+                    9px 11px;
+
+                font-size: 8px;
+            }
+
+            .map-legend {
+                display: none;
+            }
+
+            .leaflet-top.leaflet-left {
+                top: 58px;
+                left: 12px;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .info-card {
+                padding: 17px;
+            }
+
+            .info-value {
+                font-size: 22px;
+            }
+
+            footer {
+                padding:
+                    28px 20px;
+            }
+        }
+
+
+        @media (max-width: 480px) {
+
+            .system-status {
+                padding: 9px 10px;
+            }
+
+            .status-dot {
+                width: 7px;
+                height: 7px;
+            }
+
+            .map-title {
+                font-size: 43px;
+            }
+
+            .map-wrapper {
+                height: 520px;
+            }
+
+            .panel-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .map-info {
+                grid-template-columns: 1fr;
+            }
+
+            .map-label {
+                max-width: 180px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <!-- =========================================================
+         NAVBAR
+    ========================================================= -->
+
+    <header class="navbar">
+
+        <a href="index.html" class="brand">
+
+            <span class="brand-fire">🔥</span>
+
+            <span class="brand-name">
+                FIREGUARD <span>AI</span>
+            </span>
+
+        </a>
+
+
+        <nav class="nav-links">
+
+            <a href="index.html">
+                COMMAND
+            </a>
+
+            <a href="map.html" class="active">
+                LIVE MAP
+            </a>
+
+            <a href="events.html">
+                EVENTS
+            </a>
+
+            <a href="analyst.html">
+                AI ANALYST
+            </a>
+
+            <a href="analytics.html">
+                ANALYTICS
+            </a>
+
+            <a href="alerts.html">
+                ALERTS
+            </a>
+
+            <a href="reports.html">
+                REPORTS
+            </a>
+
+        </nav>
+
+
+        <div class="system-status">
+
+            <span class="status-dot"></span>
+
+            SYSTEM ONLINE
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         PAGE
+    ========================================================= -->
+
+    <main class="page">
+
+
+        <!-- =====================================================
+             HERO
+        ===================================================== -->
+
+        <section class="map-header">
+
+            <div class="eyebrow">
+
+                <span class="eyebrow-line"></span>
+
+                LIVE THERMAL INTELLIGENCE
+
+            </div>
+
+
+            <h1 class="map-title">
+
+                SEE THE
+                <span>SIGNAL.</span>
+
+            </h1>
+
+
+            <p class="map-subtitle">
+
+                FireGuard AI maps thermal observations,
+                industrial risk and regional exposure into
+                a live operational view.
+
+            </p>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             MAP SECTION
+        ===================================================== -->
+
+        <section class="map-section">
+
+
+            <div class="map-layout">
+
+
+                <!-- =================================================
+                     MAP
+                ================================================= -->
+
+                <div class="map-wrapper">
+
+
+                    <!-- TOP TOOLBAR -->
+
+                    <div class="map-toolbar">
+
+                        <div class="map-label">
+                            INDIA / LIVE MONITORING
+                        </div>
+
+
+                        <div
+                            class="live-indicator loading"
+                            id="liveIndicator"
+                        >
+                            CONNECTING
+                        </div>
+
+                    </div>
+
+
+                    <!-- CLUSTER NOTICE -->
+
+                    <div
+                        class="cluster-notice"
+                        id="clusterNotice"
+                    >
+                        NEARBY EVENTS VISUALLY SEPARATED
+                    </div>
+
+
+                    <!-- ACTUAL MAP -->
+
+                    <div id="map"></div>
+
+
+                    <!-- LOADING -->
+
+                    <div
+                        class="loading-state"
+                        id="loadingState"
+                    >
+
+                        <div class="loading-box">
+                            CONNECTING TO FIREGUARD AI BACKEND...
+                        </div>
+
+                    </div>
+
+
+                    <!-- LAYER BUTTONS -->
+
+                    <div class="layer-controls">
+
+                        <button
+                            class="layer-btn active"
+                            data-layer="thermal"
+                        >
+                            THERMAL
+                        </button>
+
+
+                        <button
+                            class="layer-btn"
+                            data-layer="industrial"
+                        >
+                            INDUSTRIAL
+                        </button>
+
+
+                        <button
+                            class="layer-btn"
+                            data-layer="roads"
+                        >
+                            ROADS
+                        </button>
+
+
+                        <button
+                            class="layer-btn"
+                            data-layer="population"
+                        >
+                            POPULATION
+                        </button>
+
+                    </div>
+
+
+                    <!-- LEGEND -->
+
+                    <div class="map-legend">
+
+                        <div class="legend-title">
+                            EVENT SEVERITY
+                        </div>
+
+
+                        <div class="legend-item">
+
+                            <span
+                                class="legend-dot legend-critical"
+                            ></span>
+
+                            CRITICAL
+
+                        </div>
+
+
+                        <div class="legend-item">
+
+                            <span
+                                class="legend-dot legend-high"
+                            ></span>
+
+                            HIGH
+
+                        </div>
+
+
+                        <div class="legend-item">
+
+                            <span
+                                class="legend-dot legend-moderate"
+                            ></span>
+
+                            MODERATE
+
+                        </div>
+
+
+                        <div class="legend-item">
+
+                            <span
+                                class="legend-dot legend-low"
+                            ></span>
+
+                            LOW
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     EVENT PANEL
+                ================================================= -->
+
+                <aside class="event-panel">
+
+
+                    <div class="panel-label">
+                        SELECTED EVENT
+                    </div>
+
+
+                    <div
+                        class="selected-id"
+                        id="selectedEvent"
+                    >
+                        --
+                    </div>
+
+
+                    <div
+                        class="selected-status"
+                        id="selectedStatus"
+                    >
+                        WAITING FOR DATA
+                    </div>
+
+
+                    <div
+                        class="selected-location"
+                        id="selectedLocation"
+                    >
+                        --
+                    </div>
+
+
+                    <div
+                        class="event-description"
+                        id="selectedDescription"
+                    >
+                        Connecting to FireGuard AI backend...
+                    </div>
+
+
+                    <div class="panel-metrics">
+
+
+                        <div class="metric">
+
+                            <span class="metric-label">
+                                TEMPERATURE
+                            </span>
+
+                            <span
+                                class="metric-value temperature"
+                                id="panelTemperature"
+                            >
+                                --
+                            </span>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <span class="metric-label">
+                                CONFIDENCE
+                            </span>
+
+                            <span
+                                class="metric-value"
+                                id="panelConfidence"
+                            >
+                                --
+                            </span>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <span class="metric-label">
+                                REGION
+                            </span>
+
+                            <span
+                                class="metric-value"
+                                id="panelCity"
+                            >
+                                --
+                            </span>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <span class="metric-label">
+                                STATUS
+                            </span>
+
+                            <span
+                                class="metric-value"
+                                id="panelStatus"
+                            >
+                                --
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <button
+                        class="investigate-btn"
+                        onclick="investigateEvent()"
+                    >
+                        INVESTIGATE EVENT →
+                    </button>
+
+
+                </aside>
+
+            </div>
+
+
+
+            <!-- =====================================================
+                 SUMMARY
+            ===================================================== -->
+
+            <div class="map-info">
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        TOTAL EVENTS
+                    </div>
+
+                    <div
+                        class="info-value"
+                        id="totalEvents"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        CRITICAL
+                    </div>
+
+                    <div
+                        class="info-value red"
+                        id="criticalEvents"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        HIGH RISK
+                    </div>
+
+                    <div
+                        class="info-value orange"
+                        id="highEvents"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        ACTIVE
+                    </div>
+
+                    <div
+                        class="info-value green"
+                        id="activeEvents"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================================================
+         FOOTER
+    ========================================================= -->
+
+    <footer>
+
+        FIREGUARD AI
+        &nbsp; / &nbsp;
+        SATELLITE FIRE INTELLIGENCE
+        &nbsp; / &nbsp;
+        LIVE OPERATIONAL MAP
+
+    </footer>
+
+
+
+    <!-- =========================================================
+         LEAFLET
+    ========================================================= -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+
+
+
+    <script>
+
+        /* =========================================================
+           FIREGUARD API
+        ========================================================= */
+
+        const API_BASE = "http://127.0.0.1:5000";
+
+
+        /* =========================================================
+           STATE
+        ========================================================= */
+
+        let events = [];
+
+        let selectedEventData = null;
+
+        let firstLoad = true;
+
+        let activeLayerName = "thermal";
+
+        let markerObjects = new Map();
+
+        let thermalObjects = new Map();
+
+        let industrialObjects = new Map();
+
+        let separationLines = new Map();
+
+        let clusterGroups = [];
+
+        let rerenderTimer = null;
+
+
+        /* =========================================================
+           MAP
+        ========================================================= */
+
+        const map = L.map(
+            "map",
+            {
+                zoomControl: true,
+
+                minZoom: 4,
+
+                maxZoom: 12,
+
+                preferCanvas: true,
+
+                zoomSnap: 0.5,
+
+                zoomDelta: 0.5
+            }
+        );
+
+
+        map.setView(
+            [21.0, 78.9],
+            5
+        );
+
+
+        /* =========================================================
+           DARK CARTO MAP
+        ========================================================= */
+
+        const darkTiles = L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+            {
+                attribution:
+                    '&copy; OpenStreetMap contributors &copy; CARTO',
+
+                subdomains:
+                    "abcd",
+
+                maxZoom:
+                    20,
+
+                detectRetina:
+                    true
+            }
+        );
+
+
+        darkTiles.addTo(map);
+
+
+        /* =========================================================
+           LAYERS
+        ========================================================= */
+
+        const markerLayer =
+            L.layerGroup().addTo(map);
+
+        const thermalLayer =
+            L.layerGroup();
+
+        const industrialLayer =
+            L.layerGroup();
+
+        const populationLayer =
+            L.layerGroup();
+
+        const roadsLayer =
+            L.layerGroup();
+
+
+        /* =========================================================
+           COLORS
+        ========================================================= */
+
+        function getColor(severity) {
+
+            const value =
+                String(severity || "")
+                    .trim()
+                    .toUpperCase();
+
+
+            if (value === "CRITICAL") {
+                return "#ff2f1f";
+            }
+
+
+            if (value === "HIGH") {
+                return "#ff7800";
+            }
+
+
+            if (value === "MODERATE") {
+                return "#ffd000";
+            }
+
+
+            return "#35e47b";
+        }
+
+
+        /* =========================================================
+           ESCAPE HTML
+        ========================================================= */
+
+        function escapeHtml(value) {
+
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        /* =========================================================
+           NORMALIZE EVENT
+        ========================================================= */
+
+        function normalizeEvent(event) {
+
+            const severity =
+                String(
+                    event.severity ||
+                    event.risk ||
+                    "LOW"
+                )
+                .trim()
+                .toUpperCase();
+
+
+            const city =
+                event.region ||
+                event.city ||
+                "Unknown";
+
+
+            let description =
+                event.description ||
+                event.assessment ||
+                event.explanation;
+
+
+            if (!description) {
+
+                if (severity === "CRITICAL") {
+
+                    description =
+                        "Critical thermal activity detected near an industrial area. Immediate operational verification is recommended.";
+
+                }
+
+                else if (severity === "HIGH") {
+
+                    description =
+                        "Elevated thermal activity detected near industrial infrastructure. Continued monitoring and verification are recommended.";
+
+                }
+
+                else if (severity === "MODERATE") {
+
+                    description =
+                        "Moderate thermal activity detected. Continued observation is recommended.";
+
+                }
+
+                else {
+
+                    description =
+                        "Low-level thermal signal detected. Routine monitoring is appropriate.";
+
+                }
+            }
+
+
+            const lat =
+                Number(event.lat);
+
+
+            const lng =
+                Number(event.lng);
+
+
+            return {
+
+                id:
+                    event.id ||
+                    event.event_id ||
+                    "UNKNOWN",
+
+                city:
+                    city,
+
+                region:
+                    city,
+
+                lat:
+                    lat,
+
+                lng:
+                    lng,
+
+                risk:
+                    severity,
+
+                severity:
+                    severity,
+
+                temperature:
+                    event.temperature ??
+                    event.thermal_signal ??
+                    "--",
+
+                confidence:
+                    event.confidence ??
+                    event.ai_confidence ??
+                    "--",
+
+                status:
+                    String(
+                        event.status ||
+                        "UNKNOWN"
+                    )
+                    .toUpperCase(),
+
+                type:
+                    event.type ||
+                    event.event_type ||
+                    "Thermal Event",
+
+                description:
+                    description,
+
+                time:
+                    event.time ||
+                    event.detected_at ||
+                    "--",
+
+                score:
+                    event.threat_score ??
+                    event.score ??
+                    null
+            };
+        }
+
+
+        /* =========================================================
+           SELECTED EVENT
+        ========================================================= */
+
+        function updateSelectedEvent(event) {
+
+            if (!event) {
+                return;
+            }
+
+
+            selectedEventData = event;
+
+
+            const color =
+                getColor(event.risk);
+
+
+            const severityClass =
+                String(event.risk)
+                    .toLowerCase();
+
+
+            document.getElementById(
+                "selectedEvent"
+            ).textContent =
+                event.id;
+
+
+            const statusElement =
+                document.getElementById(
+                    "selectedStatus"
+                );
+
+
+            statusElement.textContent =
+                `${event.risk} / ${event.status}`;
+
+
+            statusElement.style.color =
+                color;
+
+
+            statusElement.style.borderColor =
+                color;
+
+
+            document.getElementById(
+                "selectedLocation"
+            ).textContent =
+                event.city;
+
+
+            document.getElementById(
+                "panelTemperature"
+            ).textContent =
+                event.temperature;
+
+
+            document.getElementById(
+                "panelConfidence"
+            ).textContent =
+                event.confidence;
+
+
+            document.getElementById(
+                "panelCity"
+            ).textContent =
+                event.city;
+
+
+            document.getElementById(
+                "panelStatus"
+            ).textContent =
+                event.status;
+
+
+            document.getElementById(
+                "selectedDescription"
+            ).innerHTML = `
+
+                <strong>TYPE</strong>
+                <br>
+
+                ${escapeHtml(event.type)}
+
+                <br><br>
+
+                <strong>TEMPERATURE</strong>
+                <br>
+
+                ${escapeHtml(event.temperature)}
+
+                <br><br>
+
+                <strong>CONFIDENCE</strong>
+                <br>
+
+                ${escapeHtml(event.confidence)}
+
+                <br><br>
+
+                <strong>RISK</strong>
+                <br>
+
+                <span class="${severityClass}">
+                    ${escapeHtml(event.risk)}
+                </span>
+
+                <br><br>
+
+                ${escapeHtml(event.description)}
+
+                <br><br>
+
+                <strong>DETECTED</strong>
+                <br>
+
+                ${escapeHtml(event.time)}
+
+            `;
+
+
+            updateMarkerSelection();
+        }
+
+
+        /* =========================================================
+           POPUP
+        ========================================================= */
+
+        function createPopup(event) {
+
+            return `
+
+                <div class="popup-title">
+                    🔥 ${escapeHtml(event.id)}
+                </div>
+
+                <div class="popup-text">
+
+                    <strong>
+                        ${escapeHtml(event.city)}
+                    </strong>
+
+                    <br><br>
+
+                    Type:
+                    <strong>
+                        ${escapeHtml(event.type)}
+                    </strong>
+
+                    <br>
+
+                    Risk:
+                    <strong
+                        style="color:${getColor(event.risk)}"
+                    >
+                        ${escapeHtml(event.risk)}
+                    </strong>
+
+                    <br>
+
+                    Temperature:
+                    <strong>
+                        ${escapeHtml(event.temperature)}
+                    </strong>
+
+                    <br>
+
+                    Confidence:
+                    <strong>
+                        ${escapeHtml(event.confidence)}
+                    </strong>
+
+                    <br>
+
+                    Status:
+                    <strong>
+                        ${escapeHtml(event.status)}
+                    </strong>
+
+                    <br>
+
+                    Time:
+                    <strong>
+                        ${escapeHtml(event.time)}
+                    </strong>
+
+                    <br><br>
+
+                    ${escapeHtml(event.description)}
+
+                </div>
+            `;
+        }
+
+
+        /* =========================================================
+           MARKER ICON
+        ========================================================= */
+
+        function createEventIcon(
+            event,
+            selected = false
+        ) {
+
+            const color =
+                getColor(event.risk);
+
+
+            const critical =
+                event.risk === "CRITICAL"
+                    ? "critical"
+                    : "";
+
+
+            const selectedClass =
+                selected
+                    ? "selected"
+                    : "";
+
+
+            return L.divIcon({
+
+                className:
+                    "fireguard-event-icon",
+
+                html: `
+
+                    <div
+                        class="fire-marker ${critical} ${selectedClass}"
+                        style="--marker-color:${color}"
+                    >
+
+                        <div
+                            class="fire-marker-ring"
+                        ></div>
+
+                        <div
+                            class="fire-marker-core"
+                        ></div>
+
+                        ${
+                            selected
+                                ? `
+                                    <div
+                                        class="fire-marker-label"
+                                    >
+                                        ${escapeHtml(event.id)}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                `,
+
+                iconSize:
+                    [30, 30],
+
+                iconAnchor:
+                    [15, 15],
+
+                popupAnchor:
+                    [0, -18]
+            });
+        }
+
+
+        /* =========================================================
+           FIND VISUAL CLUSTERS
+           
+           We work in screen pixels, not latitude/longitude.
+           
+           This means overlap detection remains correct when
+           the user zooms or moves the map.
+        ========================================================= */
+
+        function findNearbyGroups() {
+
+            clusterGroups = [];
+
+
+            const validEvents =
+                events.filter(
+                    event =>
+                        Number.isFinite(event.lat) &&
+                        Number.isFinite(event.lng)
+                );
+
+
+            const projected =
+                validEvents.map(
+                    event => {
+
+                        const point =
+                            map.latLngToLayerPoint(
+                                [
+                                    event.lat,
+                                    event.lng
+                                ]
+                            );
+
+
+                        return {
+                            event,
+                            point
+                        };
+                    }
+                );
+
+
+            const visited =
+                new Set();
+
+
+            /*
+                Slightly larger threshold catches markers that
+                would otherwise visually touch.
+            */
+
+            const threshold = 46;
+
+
+            projected.forEach(
+                item => {
+
+                    if (
+                        visited.has(
+                            item.event.id
+                        )
+                    ) {
+                        return;
+                    }
+
+
+                    const group = [item];
+
+
+                    visited.add(
+                        item.event.id
+                    );
+
+
+                    projected.forEach(
+                        other => {
+
+                            if (
+                                visited.has(
+                                    other.event.id
+                                )
+                            ) {
+                                return;
+                            }
+
+
+                            const dx =
+                                item.point.x -
+                                other.point.x;
+
+
+                            const dy =
+                                item.point.y -
+                                other.point.y;
+
+
+                            const distance =
+                                Math.sqrt(
+                                    dx * dx +
+                                    dy * dy
+                                );
+
+
+                            if (
+                                distance <
+                                threshold
+                            ) {
+
+                                group.push(
+                                    other
+                                );
+
+
+                                visited.add(
+                                    other.event.id
+                                );
+                            }
+
+                        }
+                    );
+
+
+                    if (
+                        group.length > 1
+                    ) {
+
+                        clusterGroups.push(
+                            group.map(
+                                item =>
+                                    item.event
+                            )
+                        );
+                    }
+
+                }
+            );
+
+
+            return clusterGroups;
+        }
+
+
+        /* =========================================================
+           VISUAL POSITION
+           
+           Backend lat/lng NEVER changes.
+           
+           Only the screen position of nearby markers changes.
+        ========================================================= */
+
+        function getVisualPosition(event) {
+
+            const nearby =
+                clusterGroups.find(
+                    group =>
+                        group.some(
+                            item =>
+                                item.id ===
+                                event.id
+                        )
+                );
+
+
+            if (!nearby) {
+
+                return [
+                    event.lat,
+                    event.lng
+                ];
+            }
+
+
+            const index =
+                nearby.findIndex(
+                    item =>
+                        item.id ===
+                        event.id
+                );
+
+
+            const count =
+                nearby.length;
+
+
+            const center =
+                map.latLngToLayerPoint(
+                    [
+                        event.lat,
+                        event.lng
+                    ]
+                );
+
+
+            /*
+                Keep the separation controlled.
+
+                2 markers:
+                vertically separated.
+
+                3+:
+                circular arrangement.
+            */
+
+            const radius =
+                Math.min(
+                    38 + count * 3,
+                    54
+                );
+
+
+            let angle;
+
+
+            if (count === 2) {
+
+                angle =
+                    index === 0
+                        ? -Math.PI / 2
+                        : Math.PI / 2;
+
+            }
+
+            else {
+
+                angle =
+                    (
+                        index /
+                        count
+                    ) *
+                    Math.PI *
+                    2 -
+                    Math.PI / 2;
+
+            }
+
+
+            const offsetX =
+                Math.cos(angle) *
+                radius;
+
+
+            const offsetY =
+                Math.sin(angle) *
+                radius;
+
+
+            const visualPoint =
+                L.point(
+                    center.x + offsetX,
+                    center.y + offsetY
+                );
+
+
+            const visualLatLng =
+                map.layerPointToLatLng(
+                    visualPoint
+                );
+
+
+            return [
+                visualLatLng.lat,
+                visualLatLng.lng
+            ];
+        }
+
+
+        /* =========================================================
+           UPDATE CLUSTER NOTICE
+        ========================================================= */
+
+        function updateClusterNotice() {
+
+            const notice =
+                document.getElementById(
+                    "clusterNotice"
+                );
+
+
+            if (
+                clusterGroups.length > 0
+            ) {
+
+                const totalNearby =
+                    clusterGroups.reduce(
+                        (
+                            total,
+                            group
+                        ) =>
+                            total +
+                            group.length,
+                        0
+                    );
+
+
+                notice.textContent =
+                    `${totalNearby} NEARBY EVENTS VISUALLY SEPARATED`;
+
+
+                notice.classList.add(
+                    "show"
+                );
+
+            }
+
+            else {
+
+                notice.classList.remove(
+                    "show"
+                );
+
+            }
+        }
+
+
+        /* =========================================================
+           CLEAR SEPARATION LINES
+        ========================================================= */
+
+        function clearSeparationLines() {
+
+            separationLines.forEach(
+                line => {
+                    line.remove();
+                }
+            );
+
+
+            separationLines.clear();
+        }
+
+
+        /* =========================================================
+           DRAW SEPARATION LINES
+           
+           Very subtle connector lines make it obvious that a
+           marker was visually separated from its real location.
+        ========================================================= */
+
+        function renderSeparationLines() {
+
+            clearSeparationLines();
+
+
+            events.forEach(
+                event => {
+
+                    if (
+                        !Number.isFinite(event.lat) ||
+                        !Number.isFinite(event.lng)
+                    ) {
+                        return;
+                    }
+
+
+                    const visualPosition =
+                        getVisualPosition(event);
+
+
+                    const samePosition =
+                        Math.abs(
+                            visualPosition[0] -
+                            event.lat
+                        ) < 0.000001 &&
+                        Math.abs(
+                            visualPosition[1] -
+                            event.lng
+                        ) < 0.000001;
+
+
+                    if (samePosition) {
+                        return;
+                    }
+
+
+                    const color =
+                        getColor(event.risk);
+
+
+                    const line =
+                        L.polyline(
+                            [
+                                [
+                                    event.lat,
+                                    event.lng
+                                ],
+
+                                visualPosition
+                            ],
+                            {
+                                color: color,
+
+                                opacity: 0.18,
+
+                                weight: 1,
+
+                                dashArray:
+                                    "3 5",
+
+                                interactive:
+                                    false
+                            }
+                        );
+
+
+                    line.addTo(
+                        markerLayer
+                    );
+
+
+                    separationLines.set(
+                        event.id,
+                        line
+                    );
+
+                }
+            );
+        }
+
+
+        /* =========================================================
+           RENDER MARKERS
+        ========================================================= */
+
+        function renderMarkers() {
+
+            markerLayer.clearLayers();
+
+            markerObjects.clear();
+
+            separationLines.clear();
+
+
+            findNearbyGroups();
+
+            updateClusterNotice();
+
+
+            /*
+                First draw subtle connector lines.
+            */
+
+            renderSeparationLines();
+
+
+            /*
+                Then draw markers over the lines.
+            */
+
+            events.forEach(
+                event => {
+
+                    if (
+                        !Number.isFinite(event.lat) ||
+                        !Number.isFinite(event.lng)
+                    ) {
+                        return;
+                    }
+
+
+                    const selected =
+                        selectedEventData &&
+                        selectedEventData.id ===
+                        event.id;
+
+
+                    const visualPosition =
+                        getVisualPosition(event);
+
+
+                    const marker =
+                        L.marker(
+                            visualPosition,
+                            {
+                                icon:
+                                    createEventIcon(
+                                        event,
+                                        selected
+                                    ),
+
+                                keyboard:
+                                    true,
+
+                                zIndexOffset:
+                                    selected
+                                        ? 1500
+                                        : event.risk === "CRITICAL"
+                                            ? 900
+                                            : event.risk === "HIGH"
+                                                ? 700
+                                                : 500
+                            }
+                        );
+
+
+                    marker.bindPopup(
+                        createPopup(event)
+                    );
+
+
+                    /*
+                        Tooltip appears only when the user hovers.
+                        This removes the huge pile of permanent
+                        FG-001 / FG-002 / FG-003 labels.
+                    */
+
+                    marker.bindTooltip(
+                        `
+                            <strong>
+                                ${escapeHtml(event.id)}
+                            </strong>
+                            —
+                            ${escapeHtml(event.city)}
+                        `,
+                        {
+                            direction:
+                                "top",
+
+                            offset:
+                                [0, -16],
+
+                            opacity:
+                                0.95
+                        }
+                    );
+
+
+                    marker.on(
+                        "click",
+                        function () {
+
+                            updateSelectedEvent(
+                                event
+                            );
+
+
+                            renderMarkers();
+
+
+                            marker.openPopup();
+
+                        }
+                    );
+
+
+                    marker.addTo(
+                        markerLayer
+                    );
+
+
+                    markerObjects.set(
+                        event.id,
+                        marker
+                    );
+
+                }
+            );
+        }
+
+
+        /* =========================================================
+           UPDATE MARKER SELECTION
+        ========================================================= */
+
+        function updateMarkerSelection() {
+
+            if (!events.length) {
+                return;
+            }
+
+
+            /*
+                Re-render is more reliable here because selected
+                marker position may also belong to a visual group.
+            */
+
+            renderMarkers();
+        }
+
+
+        /* =========================================================
+           THERMAL LAYER
+           
+           IMPORTANT:
+           Thermal circles are deliberately subtle and small.
+        ========================================================= */
+
+        function renderThermalLayer() {
+
+            thermalLayer.clearLayers();
+
+            thermalObjects.clear();
+
+
+            events.forEach(
+                event => {
+
+                    if (
+                        !Number.isFinite(event.lat) ||
+                        !Number.isFinite(event.lng)
+                    ) {
+                        return;
+                    }
+
+
+                    const temperature =
+                        parseFloat(
+                            String(
+                                event.temperature
+                            )
+                            .replace("°C", "")
+                            .replace("C", "")
+                        );
+
+
+                    const safeTemperature =
+                        Number.isFinite(
+                            temperature
+                        )
+                            ? temperature
+                            : 40;
+
+
+                    /*
+                        Small operational radius.
+
+                        The old version could visually make several
+                        large circles overlap. This version keeps
+                        the thermal layer restrained.
+                    */
+
+                    const glowRadius =
+                        Math.max(
+                            2200,
+                            Math.min(
+                                6500,
+                                Math.max(
+                                    0,
+                                    safeTemperature - 35
+                                ) * 280
+                            )
+                        );
+
+
+                    const color =
+                        getColor(
+                            event.risk
+                        );
+
+
+                    const circle =
+                        L.circle(
+                            [
+                                event.lat,
+                                event.lng
+                            ],
+                            {
+                                radius:
+                                    glowRadius,
+
+                                color:
+                                    color,
+
+                                fillColor:
+                                    color,
+
+                                fillOpacity:
+                                    event.risk ===
+                                    "CRITICAL"
+                                        ? 0.035
+                                        : 0.018,
+
+                                opacity:
+                                    0.15,
+
+                                weight:
+                                    1,
+
+                                interactive:
+                                    false
+                            }
+                        );
+
+
+                    circle.addTo(
+                        thermalLayer
+                    );
+
+
+                    thermalObjects.set(
+                        event.id,
+                        circle
+                    );
+
+                }
+            );
+        }
+
+
+        /* =========================================================
+           INDUSTRIAL LAYER
+        ========================================================= */
+
+        function renderIndustrialLayer() {
+
+            industrialLayer.clearLayers();
+
+            industrialObjects.clear();
+
+
+            events
+                .filter(
+                    event =>
+                        event.risk === "CRITICAL" ||
+                        event.risk === "HIGH"
+                )
+                .forEach(
+                    event => {
+
+                        if (
+                            !Number.isFinite(event.lat) ||
+                            !Number.isFinite(event.lng)
+                        ) {
+                            return;
+                        }
+
+
+                        const radius =
+                            event.risk === "CRITICAL"
+                                ? 7500
+                                : 5500;
+
+
+                        const color =
+                            getColor(
+                                event.risk
+                            );
+
+
+                        const circle =
+                            L.circle(
+                                [
+                                    event.lat,
+                                    event.lng
+                                ],
+                                {
+                                    radius:
+                                        radius,
+
+                                    color:
+                                        color,
+
+                                    fillColor:
+                                        color,
+
+                                    fillOpacity:
+                                        0.018,
+
+                                    opacity:
+                                        0.25,
+
+                                    weight:
+                                        1,
+
+                                    dashArray:
+                                        "5 7",
+
+                                    interactive:
+                                        false
+                                }
+                            );
+
+
+                        circle.bindTooltip(
+                            `${escapeHtml(event.city)} industrial risk zone`
+                        );
+
+
+                        circle.addTo(
+                            industrialLayer
+                        );
+
+
+                        industrialObjects.set(
+                            event.id,
+                            circle
+                        );
+
+                    }
+                );
+        }
+
+
+        /* =========================================================
+           POPULATION LAYER
+        ========================================================= */
+
+        const populationCities = [
+
+            {
+                name:
+                    "Chennai",
+
+                lat:
+                    13.0827,
+
+                lng:
+                    80.2707,
+
+                radius:
+                    18000
+            },
+
+            {
+                name:
+                    "Bengaluru",
+
+                lat:
+                    12.9716,
+
+                lng:
+                    77.5946,
+
+                radius:
+                    16000
+            },
+
+            {
+                name:
+                    "Mumbai",
+
+                lat:
+                    19.0760,
+
+                lng:
+                    72.8777,
+
+                radius:
+                    22000
+            },
+
+            {
+                name:
+                    "Hyderabad",
+
+                lat:
+                    17.3850,
+
+                lng:
+                    78.4867,
+
+                radius:
+                    15000
+            },
+
+            {
+                name:
+                    "Delhi",
+
+                lat:
+                    28.6139,
+
+                lng:
+                    77.2090,
+
+                radius:
+                    25000
+            }
+
+        ];
+
+
+        function renderPopulationLayer() {
+
+            populationLayer.clearLayers();
+
+
+            populationCities.forEach(
+                city => {
+
+                    L.circle(
+                        [
+                            city.lat,
+                            city.lng
+                        ],
+                        {
+                            radius:
+                                city.radius,
+
+                            color:
+                                "#ffd000",
+
+                            fillColor:
+                                "#ffd000",
+
+                            fillOpacity:
+                                0.012,
+
+                            opacity:
+                                0.15,
+
+                            weight:
+                                1,
+
+                            dashArray:
+                                "3 6",
+
+                            interactive:
+                                false
+                        }
+                    )
+                    .bindTooltip(
+                        `${city.name} population exposure`
+                    )
+                    .addTo(
+                        populationLayer
+                    );
+
+                }
+            );
+        }
+
+
+        renderPopulationLayer();
+
+
+        /* =========================================================
+           ROAD LAYER
+        ========================================================= */
+
+        const roadTiles =
+            L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    maxZoom:
+                        19,
+
+                    opacity:
+                        0.28,
+
+                    attribution:
+                        "&copy; OpenStreetMap contributors"
+                }
+            );
+
+
+        roadTiles.addTo(
+            roadsLayer
+        );
+
+
+        /* =========================================================
+           LAYER SWITCHING
+        ========================================================= */
+
+        const layerButtons =
+            document.querySelectorAll(
+                ".layer-btn"
+            );
+
+
+        function setActiveLayer(
+            layerName
+        ) {
+
+            activeLayerName =
+                layerName;
+
+
+            /*
+                Remove every optional layer.
+            */
+
+            thermalLayer.remove();
+
+            industrialLayer.remove();
+
+            populationLayer.remove();
+
+            roadsLayer.remove();
+
+
+            /*
+                Add selected layer.
+            */
+
+            if (
+                layerName === "thermal"
+            ) {
+
+                thermalLayer.addTo(
+                    map
+                );
+            }
+
+
+            if (
+                layerName === "industrial"
+            ) {
+
+                industrialLayer.addTo(
+                    map
+                );
+            }
+
+
+            if (
+                layerName === "population"
+            ) {
+
+                populationLayer.addTo(
+                    map
+                );
+            }
+
+
+            if (
+                layerName === "roads"
+            ) {
+
+                roadsLayer.addTo(
+                    map
+                );
+            }
+
+
+            /*
+                Event markers always remain visible.
+            */
+
+            markerLayer.addTo(
+                map
+            );
+        }
+
+
+        layerButtons.forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        layerButtons.forEach(
+                            btn => {
+                                btn.classList.remove(
+                                    "active"
+                                );
+                            }
+                        );
+
+
+                        this.classList.add(
+                            "active"
+                        );
+
+
+                        setActiveLayer(
+                            this.dataset.layer
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        /* =========================================================
+           SUMMARY COUNTS
+        ========================================================= */
+
+        function updateSummaryCounts() {
+
+            const criticalCount =
+                events.filter(
+                    event =>
+                        event.risk ===
+                        "CRITICAL"
+                ).length;
+
+
+            const highCount =
+                events.filter(
+                    event =>
+                        event.risk ===
+                        "HIGH"
+                ).length;
+
+
+            const activeCount =
+                events.filter(
+                    event =>
+                        event.status ===
+                        "ACTIVE"
+                ).length;
+
+
+            document.getElementById(
+                "totalEvents"
+            ).textContent =
+                events.length;
+
+
+            document.getElementById(
+                "criticalEvents"
+            ).textContent =
+                criticalCount;
+
+
+            document.getElementById(
+                "highEvents"
+            ).textContent =
+                highCount;
+
+
+            document.getElementById(
+                "activeEvents"
+            ).textContent =
+                activeCount;
+        }
+
+
+        /* =========================================================
+           FIT MAP
+        ========================================================= */
+
+        function fitMapToEvents() {
+
+            const validEvents =
+                events.filter(
+                    event =>
+                        Number.isFinite(event.lat) &&
+                        Number.isFinite(event.lng)
+                );
+
+
+            if (!validEvents.length) {
+
+                map.setView(
+                    [21.0, 78.9],
+                    5
+                );
+
+                return;
+            }
+
+
+            /*
+                One event:
+                don't zoom too far into it.
+            */
+
+            if (
+                validEvents.length === 1
+            ) {
+
+                map.setView(
+                    [
+                        validEvents[0].lat,
+                        validEvents[0].lng
+                    ],
+                    6
+                );
+
+                return;
+            }
+
+
+            const bounds =
+                L.latLngBounds(
+                    validEvents.map(
+                        event => [
+                            event.lat,
+                            event.lng
+                        ]
+                    )
+                );
+
+
+            map.fitBounds(
+                bounds,
+                {
+                    padding:
+                        [70, 70],
+
+                    maxZoom:
+                        6
+                }
+            );
+        }
+
+
+        /* =========================================================
+           MAP MOVE / ZOOM
+        ========================================================= */
+
+        function scheduleMarkerReposition() {
+
+            clearTimeout(
+                rerenderTimer
+            );
+
+
+            rerenderTimer =
+                setTimeout(
+                    () => {
+
+                        if (
+                            events.length
+                        ) {
+
+                            renderMarkers();
+
+                        }
+
+                    },
+                    100
+                );
+        }
+
+
+        map.on(
+            "zoomend",
+            scheduleMarkerReposition
+        );
+
+
+        map.on(
+            "moveend",
+            scheduleMarkerReposition
+        );
+
+
+        /* =========================================================
+           LIVE INDICATOR
+        ========================================================= */
+
+        function setLiveState(
+            state
+        ) {
+
+            const indicator =
+                document.getElementById(
+                    "liveIndicator"
+                );
+
+
+            indicator.classList.remove(
+                "loading",
+                "error"
+            );
+
+
+            if (
+                state ===
+                "loading"
+            ) {
+
+                indicator.classList.add(
+                    "loading"
+                );
+
+                indicator.textContent =
+                    "CONNECTING";
+
+                return;
+            }
+
+
+            if (
+                state ===
+                "error"
+            ) {
+
+                indicator.classList.add(
+                    "error"
+                );
+
+                indicator.textContent =
+                    "OFFLINE";
+
+                return;
+            }
+
+
+            indicator.textContent =
+                "LIVE DATA";
+        }
+
+
+        /* =========================================================
+           LOADING
+        ========================================================= */
+
+        function setLoading(
+            isLoading
+        ) {
+
+            const loadingState =
+                document.getElementById(
+                    "loadingState"
+                );
+
+
+            if (
+                isLoading
+            ) {
+
+                loadingState.classList.remove(
+                    "hidden"
+                );
+
+            }
+
+            else {
+
+                loadingState.classList.add(
+                    "hidden"
+                );
+
+            }
+        }
+
+
+        /* =========================================================
+           LOAD EVENTS FROM BACKEND
+        ========================================================= */
+
+        async function loadEventsFromBackend() {
+
+            setLoading(true);
+
+            setLiveState(
+                "loading"
+            );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_BASE}/api/events`,
+                        {
+                            method:
+                                "GET",
+
+                            headers:
+                                {
+                                    "Accept":
+                                        "application/json"
+                                },
+
+                            cache:
+                                "no-store"
+                        }
+                    );
+
+
+                if (
+                    !response.ok
+                ) {
+
+                    throw new Error(
+                        `Backend returned HTTP ${response.status}`
+                    );
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    data.status !==
+                    "success"
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Backend returned unsuccessful response"
+                    );
+                }
+
+
+                if (
+                    !Array.isArray(
+                        data.events
+                    )
+                ) {
+
+                    throw new Error(
+                        "Backend response does not contain events array"
+                    );
+                }
+
+
+                events =
+                    data.events.map(
+                        normalizeEvent
+                    );
+
+
+                console.log(
+                    "🔥 FireGuard AI events loaded:",
+                    events
+                );
+
+
+                updateSummaryCounts();
+
+
+                renderThermalLayer();
+
+                renderIndustrialLayer();
+
+                renderPopulationLayer();
+
+
+                if (
+                    events.length > 0
+                ) {
+
+                    updateSelectedEvent(
+                        events[0]
+                    );
+
+                }
+
+
+                setActiveLayer(
+                    activeLayerName
+                );
+
+
+                /*
+                    Wait for the DOM/map to finish sizing before
+                    calculating the event view.
+                */
+
+                if (
+                    firstLoad
+                ) {
+
+                    setTimeout(
+                        function () {
+
+                            map.invalidateSize();
+
+                            fitMapToEvents();
+
+                            setTimeout(
+                                function () {
+
+                                    renderMarkers();
+
+                                    map.invalidateSize();
+
+                                },
+                                350
+                            );
+
+                        },
+                        250
+                    );
+
+
+                    firstLoad =
+                        false;
+
+                }
+
+                else {
+
+                    renderMarkers();
+
+                }
+
+
+                setLiveState(
+                    "online"
+                );
+
+
+                setLoading(
+                    false
+                );
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "❌ FireGuard AI backend connection failed:",
+                    error
+                );
+
+
+                setLiveState(
+                    "error"
+                );
+
+
+                setLoading(
+                    false
+                );
+
+
+                document.getElementById(
+                    "selectedEvent"
+                ).textContent =
+                    "ERROR";
+
+
+                document.getElementById(
+                    "selectedStatus"
+                ).textContent =
+                    "BACKEND OFFLINE";
+
+
+                document.getElementById(
+                    "selectedStatus"
+                ).style.color =
+                    "#ff3828";
+
+
+                document.getElementById(
+                    "selectedStatus"
+                ).style.borderColor =
+                    "#ff3828";
+
+
+                document.getElementById(
+                    "selectedLocation"
+                ).textContent =
+                    "--";
+
+
+                document.getElementById(
+                    "selectedDescription"
+                ).innerHTML = `
+
+                    <strong>
+                        Unable to load live event data.
+                    </strong>
+
+                    <br><br>
+
+                    Make sure the FireGuard AI
+                    Flask backend is running.
+
+                    <br><br>
+
+                    Backend:
+                    <strong>
+                        http://127.0.0.1:5000
+                    </strong>
+
+                    <br><br>
+
+                    Then refresh this page.
+
+                `;
+            }
+        }
+
+
+        /* =========================================================
+           INVESTIGATE EVENT
+        ========================================================= */
+
+        function investigateEvent() {
+
+            if (
+                !selectedEventData ||
+                !selectedEventData.id
+            ) {
+
+                return;
+            }
+
+
+            window.location.href =
+                "events.html?event=" +
+                encodeURIComponent(
+                    selectedEventData.id
+                );
+        }
+
+
+        /* =========================================================
+           INITIAL LAYER
+        ========================================================= */
+
+        setActiveLayer(
+            "thermal"
+        );
+
+
+        /* =========================================================
+           INITIAL DATA
+        ========================================================= */
+
+        loadEventsFromBackend();
+
+
+        /* =========================================================
+           LIVE REFRESH
+           
+           Backend remains the source of truth.
+        ========================================================= */
+
+        setInterval(
+            async function () {
+
+                try {
+
+                    const response =
+                        await fetch(
+                            `${API_BASE}/api/events`,
+                            {
+                                method:
+                                    "GET",
+
+                                cache:
+                                    "no-store"
+                            }
+                        );
+
+
+                    if (
+                        !response.ok
+                    ) {
+
+                        throw new Error(
+                            `HTTP ${response.status}`
+                        );
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        data.status !==
+                            "success" ||
+                        !Array.isArray(
+                            data.events
+                        )
+                    ) {
+
+                        return;
+                    }
+
+
+                    const previousSelectedId =
+                        selectedEventData
+                            ? selectedEventData.id
+                            : null;
+
+
+                    events =
+                        data.events.map(
+                            normalizeEvent
+                        );
+
+
+                    renderThermalLayer();
+
+                    renderIndustrialLayer();
+
+                    renderPopulationLayer();
+
+                    updateSummaryCounts();
+
+
+                    const selected =
+                        events.find(
+                            event =>
+                                event.id ===
+                                previousSelectedId
+                        );
+
+
+                    if (
+                        selected
+                    ) {
+
+                        selectedEventData =
+                            selected;
+
+                        updateSelectedEvent(
+                            selected
+                        );
+
+                    }
+
+                    else if (
+                        events.length
+                    ) {
+
+                        updateSelectedEvent(
+                            events[0]
+                        );
+
+                    }
+
+                    else {
+
+                        selectedEventData =
+                            null;
+
+                    }
+
+
+                    renderMarkers();
+
+
+                    setLiveState(
+                        "online"
+                    );
+
+                }
+
+
+                catch (error) {
+
+                    console.warn(
+                        "Live refresh failed:",
+                        error
+                    );
+
+
+                    setLiveState(
+                        "error"
+                    );
+                }
+
+            },
+
+            30000
+        );
+
+
+        /* =========================================================
+           MAP SIZE FIX
+        ========================================================= */
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                setTimeout(
+                    function () {
+
+                        map.invalidateSize();
+
+                    },
+                    500
+                );
+
+            }
+        );
+
+
+        window.addEventListener(
+            "resize",
+            function () {
+
+                clearTimeout(
+                    window.__mapResizeTimer
+                );
+
+
+                window.__mapResizeTimer =
+                    setTimeout(
+                        function () {
+
+                            map.invalidateSize();
+
+                            if (
+                                events.length
+                            ) {
+
+                                renderMarkers();
+
+                            }
+
+                        },
+                        150
+                    );
+
+            }
+        );
+
+
+        /* =========================================================
+           CONSOLE
+        ========================================================= */
+
+        console.log(
+            "🔥 FireGuard AI Live Map initialized."
+        );
+
+        console.log(
+            "📡 API:",
+            `${API_BASE}/api/events`
+        );
+
+    </script>
+
+</body>
+</html>

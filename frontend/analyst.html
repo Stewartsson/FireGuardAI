@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FireGuard AI — AI Analyst</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #050505;
+            color: #f4f4f4;
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =========================
+           NAVIGATION
+        ========================= */
+
+        .navbar {
+            min-height: 96px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            padding: 0 5%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 5, 5, 0.97);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-right: 70px;
+        }
+
+        .brand-fire {
+            font-size: 38px;
+        }
+
+        .brand-name {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .brand-name span {
+            color: #ff3b30;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: #777;
+            font-size: 14px;
+            letter-spacing: 1.5px;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+        }
+
+        .system-status {
+            border: 1px solid #292929;
+            border-radius: 30px;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #16e47a;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #16e47a;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            min-height: 380px;
+            padding: 90px 5% 70px;
+            border-bottom: 1px solid #222;
+            background:
+                radial-gradient(
+                    circle at 75% 30%,
+                    rgba(100, 10, 10, 0.18),
+                    transparent 45%
+                );
+        }
+
+        .eyebrow {
+            color: #ff9d00;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            margin-bottom: 38px;
+        }
+
+        .hero h1 {
+            font-size: clamp(55px, 7vw, 100px);
+            line-height: 0.95;
+            font-weight: 900;
+            max-width: 900px;
+            letter-spacing: -4px;
+        }
+
+        .hero h1 span {
+            color: #ff3b30;
+        }
+
+        .hero p {
+            margin-top: 35px;
+            max-width: 1000px;
+            color: #8190a5;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            width: 90%;
+            max-width: 1500px;
+            margin: 50px auto 100px;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1.45fr;
+            gap: 30px;
+        }
+
+        .panel {
+            border: 1px solid #292929;
+            background: #070707;
+        }
+
+        /* =========================
+           LEFT PANEL
+        ========================= */
+
+        .request-panel {
+            padding: 34px;
+        }
+
+        .section-label {
+            color: #8491a5;
+            font-size: 12px;
+            letter-spacing: 5px;
+            margin-bottom: 30px;
+        }
+
+        .field {
+            margin-bottom: 28px;
+        }
+
+        .field label {
+            display: block;
+            color: #aab1bd;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
+        textarea,
+        select {
+            width: 100%;
+            background: #0b0b0b;
+            border: 1px solid #333;
+            color: #eee;
+            padding: 17px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 190px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        textarea:focus,
+        select:focus {
+            border-color: #ff3b30;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .run-button {
+            width: 100%;
+            border: 1px solid #ff3b30;
+            background: rgba(255, 59, 48, 0.08);
+            color: #fff;
+            padding: 19px;
+            cursor: pointer;
+            font-size: 14px;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transition: 0.25s;
+        }
+
+        .run-button:hover {
+            background: #ff3b30;
+        }
+
+        .run-button:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        .quick-title {
+            margin-top: 35px;
+            margin-bottom: 15px;
+        }
+
+        .quick-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quick-button {
+            text-align: left;
+            padding: 15px;
+            border: 1px solid #252525;
+            background: #090909;
+            color: #9da8b8;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .quick-button:hover {
+            border-color: #555;
+            color: white;
+        }
+
+        /* =========================
+           RIGHT PANEL
+        ========================= */
+
+        .result-panel {
+            padding: 34px;
+            min-height: 700px;
+        }
+
+        .engine-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #242424;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .engine-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #b8c0cc;
+            font-size: 15px;
+            letter-spacing: 2px;
+        }
+
+        .engine-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ff3b30;
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.8);
+        }
+
+        .engine-status {
+            color: #788394;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        /* =========================
+           ERROR
+        ========================= */
+
+        .error-box {
+            display: none;
+            border: 1px solid #7a2424;
+            background: rgba(100, 20, 20, 0.12);
+            padding: 20px;
+            color: #ff7770;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .error-box.show {
+            display: block;
+        }
+
+        /* =========================
+           EMPTY STATE
+        ========================= */
+
+        .empty-state {
+            min-height: 540px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #687386;
+        }
+
+        .empty-icon {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #333;
+            transform: rotate(45deg);
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .empty-icon::after {
+            content: "";
+            position: absolute;
+            inset: 10px;
+            border: 2px solid #333;
+        }
+
+        .empty-state h3 {
+            font-size: 22px;
+            font-weight: normal;
+            margin-bottom: 20px;
+            color: #7d8899;
+        }
+
+        .empty-state p {
+            max-width: 600px;
+            line-height: 1.8;
+            color: #555f70;
+        }
+
+        /* =========================
+           RESULT
+        ========================= */
+
+        .result-content {
+            display: none;
+        }
+
+        .result-content.show {
+            display: block;
+        }
+
+        .threat-box {
+            border: 1px solid #5b2723;
+            background: rgba(80, 15, 10, 0.12);
+            padding: 28px 32px;
+            margin-bottom: 22px;
+        }
+
+        .threat-label {
+            color: #8a8f9b;
+            font-size: 11px;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+        }
+
+        .threat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .threat-level {
+            font-size: 42px;
+            font-weight: 900;
+            color: #ff3b30;
+        }
+
+        .score {
+            font-size: 18px;
+            color: #9da5b2;
+        }
+
+        .score strong {
+            color: white;
+            font-size: 28px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .metric {
+            border: 1px solid #252525;
+            padding: 25px;
+            min-height: 140px;
+        }
+
+        .metric-label {
+            color: #748095;
+            font-size: 11px;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+
+        .metric-value {
+            color: white;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .metric-description {
+            margin-top: 10px;
+            color: #6f7887;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            border: 1px solid #292929;
+            padding: 27px;
+            margin-bottom: 20px;
+        }
+
+        .info-title {
+            color: #ff8500;
+            font-size: 12px;
+            letter-spacing: 4px;
+            margin-bottom: 18px;
+        }
+
+        .info-text {
+            color: #a5adba;
+            line-height: 1.8;
+            font-size: 15px;
+            white-space: pre-wrap;
+        }
+
+        .response-box {
+            border: 1px solid #4c2823;
+            background: rgba(80, 20, 10, 0.10);
+            padding: 27px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1100px) {
+
+            .navbar {
+                padding: 20px 25px;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .brand {
+                margin-right: 30px;
+            }
+
+            .nav-links {
+                gap: 18px;
+                overflow-x: auto;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .navbar {
+                height: auto;
+            }
+
+            .brand {
+                margin-right: 0;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+            }
+
+            .system-status {
+                margin-left: auto;
+            }
+
+            .hero {
+                padding: 70px 25px;
+            }
+
+            .hero h1 {
+                font-size: 55px;
+            }
+
+            .main {
+                width: calc(100% - 30px);
+            }
+
+            .request-panel,
+            .result-panel {
+                padding: 22px;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .threat-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVIGATION
+    ========================= -->
+
+    <header class="navbar">
+
+        <a href="index.html" class="brand">
+            <div class="brand-fire">🔥</div>
+
+            <div class="brand-name">
+                FIREGUARD <span>AI</span>
+            </div>
+        </a>
+
+        <nav class="nav-links">
+            <a href="index.html">COMMAND</a>
+            <a href="map.html">LIVE MAP</a>
+            <a href="events.html">EVENTS</a>
+            <a href="analyst.html" class="active">AI ANALYST</a>
+            <a href="analytics.html">ANALYTICS</a>
+            <a href="alerts.html">ALERTS</a>
+            <a href="reports.html">REPORTS</a>
+        </nav>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            SYSTEM ONLINE
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         HERO
+    ========================= -->
+
+    <section class="hero">
+
+        <div class="eyebrow">
+            04 / AI INTELLIGENCE
+        </div>
+
+        <h1>
+            UNDERSTAND THE<br>
+            <span>THREAT.</span>
+        </h1>
+
+        <p>
+            Convert thermal observations and geographic context into
+            an explainable fire-risk assessment and recommended
+            operational response.
+        </p>
+
+    </section>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <main class="main">
+
+        <div class="workspace">
+
+            <!-- =========================
+                 REQUEST PANEL
+            ========================== -->
+
+            <section class="panel request-panel">
+
+                <div class="section-label">
+                    ANALYSIS REQUEST
+                </div>
+
+                <div class="field">
+
+                    <label for="situation">
+                        DESCRIBE THE SITUATION
+                    </label>
+
+                    <textarea id="situation">Analyze a critical thermal anomaly detected near an industrial area.</textarea>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="region">
+                        REGION
+                    </label>
+
+                    <select id="region">
+
+                        <option value="Chennai">
+                            Chennai
+                        </option>
+
+                        <option value="Bengaluru">
+                            Bengaluru
+                        </option>
+
+                        <option value="Mumbai">
+                            Mumbai
+                        </option>
+
+                        <option value="Delhi">
+                            Delhi
+                        </option>
+
+                        <option value="Hyderabad">
+                            Hyderabad
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="mode">
+                        ANALYSIS MODE
+                    </label>
+
+                    <select id="mode">
+
+                        <option value="thermal">
+                            Thermal Anomaly Analysis
+                        </option>
+
+                        <option value="industrial">
+                            Industrial Fire Risk
+                        </option>
+
+                        <option value="population">
+                            Population Exposure
+                        </option>
+
+                        <option value="response">
+                            Emergency Response
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    class="run-button"
+                    id="runButton"
+                    onclick="runAnalysis()"
+                >
+                    RUN AI ANALYSIS →
+                </button>
+
+
+                <div class="section-label quick-title">
+                    QUICK ANALYSIS
+                </div>
+
+
+                <div class="quick-buttons">
+
+                    <button
+                        class="quick-button"
+                        onclick="quickAnalysis('thermal')"
+                    >
+                        🔥 Analyze a critical thermal anomaly
+                    </button>
+
+                    <button
+                        class="quick-button"
+                        onclick="quickAnalysis('industrial')"
+                    >
+                        🏭 Assess industrial fire risk
+                    </button>
+
+                    <button
+                        class="quick-button"
+                        onclick="quickAnalysis('population')"
+                    >
+                        👥 Estimate population exposure
+                    </button>
+
+                    <button
+                        class="quick-button"
+                        onclick="quickAnalysis('response')"
+                    >
+                        🚨 Recommend emergency response
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 RESULT PANEL
+            ========================== -->
+
+            <section class="panel result-panel">
+
+                <div class="engine-header">
+
+                    <div class="engine-title">
+
+                        <span class="engine-dot"></span>
+
+                        FIREGUARD INTELLIGENCE ENGINE
+
+                    </div>
+
+                    <div
+                        class="engine-status"
+                        id="engineStatus"
+                    >
+                        READY
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="error-box"
+                    id="errorBox"
+                ></div>
+
+
+                <!-- EMPTY STATE -->
+
+                <div
+                    class="empty-state"
+                    id="emptyState"
+                >
+
+                    <div class="empty-icon"></div>
+
+                    <h3>
+                        Awaiting analysis
+                    </h3>
+
+                    <p>
+                        Enter an observation or select a quick analysis
+                        request. FireGuard AI will generate a structured
+                        risk assessment.
+                    </p>
+
+                </div>
+
+
+                <!-- RESULT -->
+
+                <div
+                    class="result-content"
+                    id="resultContent"
+                >
+
+                    <!-- THREAT -->
+
+                    <div class="threat-box">
+
+                        <div class="threat-label">
+                            AI ASSESSED THREAT LEVEL
+                        </div>
+
+                        <div class="threat-row">
+
+                            <div
+                                class="threat-level"
+                                id="threatLevel"
+                            >
+                                UNKNOWN
+                            </div>
+
+                            <div class="score">
+
+                                <strong id="riskScore">
+                                    --
+                                </strong>
+
+                                /100
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- METRICS -->
+
+                    <div class="metrics">
+
+                        <div class="metric">
+
+                            <div class="metric-label">
+                                THERMAL SIGNAL
+                            </div>
+
+                            <div
+                                class="metric-value"
+                                id="thermalValue"
+                            >
+                                --
+                            </div>
+
+                            <div class="metric-description">
+                                Thermal conditions detected in the
+                                selected region.
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-label">
+                                INDUSTRIAL PROXIMITY
+                            </div>
+
+                            <div
+                                class="metric-value"
+                                id="industrialValue"
+                            >
+                                --
+                            </div>
+
+                            <div class="metric-description">
+                                Potential exposure to industrial
+                                infrastructure.
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-label">
+                                POPULATION EXPOSURE
+                            </div>
+
+                            <div
+                                class="metric-value"
+                                id="populationValue"
+                            >
+                                --
+                            </div>
+
+                            <div class="metric-description">
+                                Nearby populated areas may increase
+                                consequence severity.
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-label">
+                                AI CONFIDENCE
+                            </div>
+
+                            <div
+                                class="metric-value"
+                                id="confidenceValue"
+                            >
+                                --
+                            </div>
+
+                            <div class="metric-description">
+                                Confidence based on available
+                                analysis signals.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EXPLANATION -->
+
+                    <div class="info-box">
+
+                        <div class="info-title">
+                            AI EXPLANATION
+                        </div>
+
+                        <div
+                            class="info-text"
+                            id="explanation"
+                        >
+                            No explanation available.
+                        </div>
+
+                    </div>
+
+
+                    <!-- RESPONSE -->
+
+                    <div class="response-box">
+
+                        <div class="info-title">
+                            RECOMMENDED RESPONSE
+                        </div>
+
+                        <div
+                            class="info-text"
+                            id="recommendedResponse"
+                        >
+                            No response recommendation available.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+        /*
+         * FireGuard AI Analyst
+         */
+
+        const API_BASE = "http://127.0.0.1:5000";
+
+
+        /*
+         * Quick analysis requests
+         */
+
+        const quickRequests = {
+
+            thermal:
+                "Analyze a critical thermal anomaly detected near an industrial area.",
+
+            industrial:
+                "Assess the industrial fire risk associated with the detected thermal activity.",
+
+            population:
+                "Estimate the population exposure associated with the detected fire risk.",
+
+            response:
+                "Recommend an emergency response for the detected fire threat."
+
+        };
+
+
+        /*
+         * Quick analysis
+         */
+
+        function quickAnalysis(mode) {
+
+            document.getElementById("mode").value = mode;
+
+            document.getElementById("situation").value =
+                quickRequests[mode];
+
+            runAnalysis();
+        }
+
+
+        /*
+         * Safely get a value.
+         */
+
+        function getValue(object, names, fallback = null) {
+
+            if (!object || typeof object !== "object") {
+                return fallback;
+            }
+
+            for (const name of names) {
+
+                if (
+                    object[name] !== undefined &&
+                    object[name] !== null &&
+                    object[name] !== ""
+                ) {
+                    return object[name];
+                }
+
+            }
+
+            return fallback;
+        }
+
+
+        /*
+         * Convert value to readable text.
+         */
+
+        function readable(value) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                return "--";
+            }
+
+            if (typeof value === "object") {
+
+                try {
+                    return JSON.stringify(value, null, 2);
+                } catch {
+                    return String(value);
+                }
+
+            }
+
+            return String(value);
+        }
+
+
+        /*
+         * Determine threat level.
+         */
+
+        function determineThreat(analysis) {
+
+            const level = getValue(
+                analysis,
+                [
+                    "threat_level",
+                    "threatLevel",
+                    "severity",
+                    "risk_level",
+                    "riskLevel",
+                    "level"
+                ]
+            );
+
+            if (level) {
+
+                const text =
+                    String(level).toUpperCase();
+
+                if (text.includes("CRITICAL")) {
+                    return "CRITICAL";
+                }
+
+                if (text.includes("HIGH")) {
+                    return "HIGH";
+                }
+
+                if (text.includes("MEDIUM")) {
+                    return "MEDIUM";
+                }
+
+                if (text.includes("LOW")) {
+                    return "LOW";
+                }
+
+                return text;
+            }
+
+
+            const score = Number(
+                getValue(
+                    analysis,
+                    [
+                        "threat_score",
+                        "threatScore",
+                        "risk_score",
+                        "riskScore",
+                        "score"
+                    ],
+                    0
+                )
+            );
+
+
+            if (score >= 80) {
+                return "CRITICAL";
+            }
+
+            if (score >= 60) {
+                return "HIGH";
+            }
+
+            if (score >= 35) {
+                return "MEDIUM";
+            }
+
+            if (score > 0) {
+                return "LOW";
+            }
+
+            return "UNKNOWN";
+        }
+
+
+        /*
+         * Display analysis.
+         */
+
+        function displayAnalysis(data) {
+
+            console.log(
+                "Displaying FireGuard analysis:",
+                data
+            );
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Backend response is:
+             *
+             * {
+             *     status: "success",
+             *     analysis: {
+             *         ...
+             *     }
+             * }
+             */
+
+            const analysis =
+                data &&
+                data.analysis &&
+                typeof data.analysis === "object"
+                    ? data.analysis
+                    : data;
+
+
+            if (!analysis || typeof analysis !== "object") {
+
+                throw new Error(
+                    "Invalid analysis data received from backend."
+                );
+
+            }
+
+
+            /*
+             * THREAT LEVEL
+             */
+
+            const threat =
+                determineThreat(analysis);
+
+            document.getElementById(
+                "threatLevel"
+            ).textContent = readable(threat);
+
+
+            /*
+             * THREAT SCORE
+             */
+
+            const score = getValue(
+                analysis,
+                [
+                    "threat_score",
+                    "threatScore",
+                    "risk_score",
+                    "riskScore",
+                    "score"
+                ]
+            );
+
+            document.getElementById(
+                "riskScore"
+            ).textContent =
+                score !== null
+                    ? readable(score)
+                    : "--";
+
+
+            /*
+             * TEMPERATURE
+             */
+
+            const temperature = getValue(
+                analysis,
+                [
+                    "temperature",
+                    "thermal_signal",
+                    "thermalSignal",
+                    "temp",
+                    "temperature_value"
+                ]
+            );
+
+            document.getElementById(
+                "thermalValue"
+            ).textContent =
+                readable(temperature);
+
+
+            /*
+             * INDUSTRIAL PROXIMITY
+             */
+
+            const industrial = getValue(
+                analysis,
+                [
+                    "industrial_proximity",
+                    "industrialProximity",
+                    "industrial_risk",
+                    "industrialRisk",
+                    "industrial"
+                ]
+            );
+
+            document.getElementById(
+                "industrialValue"
+            ).textContent =
+                readable(industrial);
+
+
+            /*
+             * POPULATION EXPOSURE
+             */
+
+            const population = getValue(
+                analysis,
+                [
+                    "population_exposure",
+                    "populationExposure",
+                    "population_risk",
+                    "populationRisk",
+                    "population"
+                ]
+            );
+
+            document.getElementById(
+                "populationValue"
+            ).textContent =
+                readable(population);
+
+
+            /*
+             * AI CONFIDENCE
+             */
+
+            const confidence = getValue(
+                analysis,
+                [
+                    "ai_confidence",
+                    "confidence",
+                    "aiConfidence",
+                    "confidence_value"
+                ]
+            );
+
+            document.getElementById(
+                "confidenceValue"
+            ).textContent =
+                readable(confidence);
+
+
+            /*
+             * EXPLANATION
+             */
+
+            const explanation = getValue(
+                analysis,
+                [
+                    "explanation",
+                    "assessment",
+                    "reasoning",
+                    "summary",
+                    "description"
+                ],
+                "No explanation available."
+            );
+
+            document.getElementById(
+                "explanation"
+            ).textContent =
+                readable(explanation);
+
+
+            /*
+             * RECOMMENDED RESPONSE
+             */
+
+            const recommendation = getValue(
+                analysis,
+                [
+                    "recommended_response",
+                    "recommendedResponse",
+                    "recommendation",
+                    "recommended_action",
+                    "recommendedAction",
+                    "response",
+                    "action"
+                ],
+                "No response recommendation available."
+            );
+
+            document.getElementById(
+                "recommendedResponse"
+            ).textContent =
+                readable(recommendation);
+
+
+            /*
+             * SHOW RESULT
+             */
+
+            document.getElementById(
+                "emptyState"
+            ).style.display = "none";
+
+
+            document.getElementById(
+                "resultContent"
+            ).classList.add("show");
+
+
+            document.getElementById(
+                "engineStatus"
+            ).textContent =
+                "ANALYSIS COMPLETE";
+
+
+            /*
+             * Scroll result into view.
+             */
+
+            document.getElementById(
+                "resultContent"
+            ).scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+
+        }
+
+
+        /*
+         * RUN AI ANALYSIS
+         */
+
+        async function runAnalysis() {
+
+            const button =
+                document.getElementById("runButton");
+
+            const engineStatus =
+                document.getElementById("engineStatus");
+
+            const errorBox =
+                document.getElementById("errorBox");
+
+
+            /*
+             * Clear previous error.
+             */
+
+            errorBox.classList.remove("show");
+            errorBox.textContent = "";
+
+
+            /*
+             * Disable button.
+             */
+
+            button.disabled = true;
+            button.textContent = "ANALYZING...";
+
+            engineStatus.textContent =
+                "ANALYZING";
+
+
+            try {
+
+                const situation =
+                    document
+                        .getElementById("situation")
+                        .value
+                        .trim();
+
+
+                const region =
+                    document
+                        .getElementById("region")
+                        .value;
+
+
+                const mode =
+                    document
+                        .getElementById("mode")
+                        .value;
+
+
+                /*
+                 * Your tested backend event.
+                 *
+                 * We know this works:
+                 *
+                 * FG-001
+                 */
+
+                const eventId = "FG-001";
+
+
+                /*
+                 * Send request to Flask.
+                 */
+
+                const response =
+                    await fetch(
+                        API_BASE + "/api/analyze",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                event_id: eventId,
+                                region: region,
+                                mode: mode,
+                                situation: situation
+                            })
+                        }
+                    );
+
+
+                /*
+                 * Read JSON.
+                 */
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "FireGuard AI backend response:",
+                    data
+                );
+
+
+                /*
+                 * Handle HTTP errors.
+                 */
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        data.error ||
+                        "AI analysis failed."
+                    );
+
+                }
+
+
+                /*
+                 * Make sure backend says success.
+                 */
+
+                if (
+                    data.status &&
+                    data.status !== "success"
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Backend returned an unsuccessful response."
+                    );
+
+                }
+
+
+                /*
+                 * Display result.
+                 */
+
+                displayAnalysis(data);
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "FireGuard AI error:",
+                    error
+                );
+
+
+                errorBox.textContent =
+                    "Unable to complete AI analysis: " +
+                    error.message;
+
+
+                errorBox.classList.add("show");
+
+
+                engineStatus.textContent =
+                    "ERROR";
+
+            }
+
+
+            finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "RUN AI ANALYSIS →";
+
+            }
+
+        }
+
+
+        /*
+         * Check backend.
+         */
+
+        async function checkBackend() {
+
+            const engineStatus =
+                document.getElementById(
+                    "engineStatus"
+                );
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_BASE + "/api/health"
+                    );
+
+
+                if (response.ok) {
+
+                    engineStatus.textContent =
+                        "READY";
+
+                } else {
+
+                    engineStatus.textContent =
+                        "BACKEND ERROR";
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Backend health check failed:",
+                    error
+                );
+
+                engineStatus.textContent =
+                    "BACKEND OFFLINE";
+
+            }
+
+        }
+
+
+        /*
+         * Start page.
+         */
+
+        checkBackend();
+
+    </script>
+
+</body>
+</html>

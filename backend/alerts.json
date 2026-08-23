@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ALT-001",
+    "event_id": "FG-001",
+    "title": "Critical Thermal Anomaly",
+    "message": "Critical thermal activity detected near an industrial area.",
+    "region": "Chennai",
+    "temperature": "67.4°C",
+    "confidence": "94%",
+    "severity": "CRITICAL",
+    "status": "ACKNOWLEDGED",
+    "time": "2 min ago"
+  },
+  {
+    "id": "ALT-002",
+    "event_id": "FG-002",
+    "title": "Industrial Fire Risk",
+    "message": "Elevated thermal activity detected near industrial infrastructure.",
+    "region": "Bengaluru",
+    "temperature": "61.2°C",
+    "confidence": "89%",
+    "severity": "HIGH",
+    "status": "ACTIVE",
+    "time": "8 min ago"
+  },
+  {
+    "id": "ALT-003",
+    "event_id": "FG-003",
+    "title": "Thermal Signal Detected",
+    "message": "Persistent thermal signal requires continued monitoring.",
+    "region": "Mumbai",
+    "temperature": "58.7°C",
+    "confidence": "91%",
+    "severity": "HIGH",
+    "status": "ACKNOWLEDGED",
+    "time": "14 min ago"
+  },
+  {
+    "id": "ALT-004",
+    "event_id": "FG-006",
+    "title": "Rapid Thermal Spike",
+    "message": "Rapid thermal increase detected. Additional verification recommended.",
+    "region": "Chennai",
+    "temperature": "63.1°C",
+    "confidence": "92%",
+    "severity": "HIGH",
+    "status": "ACTIVE",
+    "time": "42 min ago"
+  }
+]

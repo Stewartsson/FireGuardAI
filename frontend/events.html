@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FireGuard AI | Events</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: #050505;
+            color: #f5f5f5;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =========================================================
+           NAVBAR
+        ========================================================= */
+
+        .navbar {
+            height: 86px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5.5%;
+            background: #050505;
+            border-bottom: 1px solid #1d1d1d;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 27px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            white-space: nowrap;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            margin-right: 13px;
+        }
+
+        .logo-ai {
+            color: #ff3b20;
+            margin-left: 5px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 38px;
+            margin-left: auto;
+            margin-right: 65px;
+        }
+
+        .nav-links a {
+            color: #6f6f6f;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            transition: 0.25s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #ffffff;
+        }
+
+        .status {
+            border: 1px solid #292929;
+            border-radius: 30px;
+            padding: 13px 22px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #aaa;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #35e47b;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 13px #35e47b;
+        }
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero {
+            padding: 82px 5.5% 70px;
+            border-bottom: 1px solid #1c1c1c;
+
+            background:
+                radial-gradient(
+                    circle at 86% 0%,
+                    rgba(255, 50, 25, 0.10),
+                    transparent 38%
+                ),
+                radial-gradient(
+                    circle at 5% 100%,
+                    rgba(255, 115, 0, 0.055),
+                    transparent 32%
+                );
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+
+            color: #ff9d00;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            margin-bottom: 24px;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 42px;
+            height: 2px;
+            background: #ff9d00;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(54px, 6vw, 92px);
+            line-height: 0.98;
+            letter-spacing: -5px;
+            font-weight: 900;
+        }
+
+        .hero h1 span {
+            color: #ff3825;
+        }
+
+        .hero p {
+            color: #777;
+            max-width: 760px;
+            line-height: 1.8;
+            margin-top: 28px;
+            font-size: 17px;
+        }
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .page {
+            width: 89%;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 55px 0 100px;
+        }
+
+        /* =========================================================
+           SUMMARY
+        ========================================================= */
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 42px;
+        }
+
+        .summary-card {
+            min-height: 125px;
+            border: 1px solid #222;
+            background: #080808;
+            padding: 24px 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background: #181818;
+        }
+
+        .summary-number {
+            font-size: 40px;
+            line-height: 1;
+            font-weight: 800;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            margin-top: 14px;
+        }
+
+        .red {
+            color: #ff3b20;
+        }
+
+        .orange {
+            color: #ff7800;
+        }
+
+        .yellow {
+            color: #ffd000;
+        }
+
+        .green {
+            color: #35e47b;
+        }
+
+        /* =========================================================
+           TOOLBAR
+        ========================================================= */
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 25px;
+            margin-bottom: 24px;
+        }
+
+        .toolbar-heading {
+            flex: 1;
+        }
+
+        .toolbar-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .event-count {
+            color: #555;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin-left: 12px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box::before {
+            content: "⌕";
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-52%);
+            color: #666;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        input,
+        select {
+            height: 43px;
+            background: #0a0a0a;
+            color: #ccc;
+            border: 1px solid #2b2b2b;
+            outline: none;
+            padding: 0 14px;
+        }
+
+        input {
+            width: 235px;
+            padding-left: 38px;
+        }
+
+        select {
+            min-width: 160px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #ff3b20;
+        }
+
+        /* =========================================================
+           LOADING
+        ========================================================= */
+
+        .loading {
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid #1c1c1c;
+            background: #080808;
+        }
+
+        .loader {
+            width: 44px;
+            height: 44px;
+            border: 2px solid #222;
+            border-top-color: #ff3b20;
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+            margin-bottom: 22px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-title {
+            color: #aaa;
+            font-size: 11px;
+            letter-spacing: 3px;
+            font-weight: 700;
+        }
+
+        .loading-text {
+            color: #4f4f4f;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* =========================================================
+           ERROR
+        ========================================================= */
+
+        .error-box {
+            display: none;
+            border: 1px solid #542019;
+            background: rgba(255, 59, 32, 0.055);
+            padding: 35px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .error-box.show {
+            display: block;
+        }
+
+        .error-title {
+            color: #ff3b20;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .error-text {
+            color: #777;
+            line-height: 1.7;
+            font-size: 13px;
+        }
+
+        .retry-btn {
+            margin-top: 20px;
+            padding: 12px 22px;
+            background: transparent;
+            border: 1px solid #ff3b20;
+            color: #fff;
+            letter-spacing: 1.5px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .retry-btn:hover {
+            background: #ff3b20;
+        }
+
+        /* =========================================================
+           EVENTS GRID
+        ========================================================= */
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .event-card {
+            background: #080808;
+            border: 1px solid #242424;
+            padding: 26px;
+            position: relative;
+            overflow: hidden;
+            transition:
+                transform 0.25s ease,
+                border-color 0.25s ease,
+                background 0.25s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-3px);
+            border-color: #444;
+            background: #0a0a0a;
+        }
+
+        .event-card.critical {
+            border-left: 3px solid #ff2f1f;
+        }
+
+        .event-card.high {
+            border-left: 3px solid #ff7800;
+        }
+
+        .event-card.moderate {
+            border-left: 3px solid #ffd000;
+        }
+
+        .event-card.low {
+            border-left: 3px solid #35e47b;
+        }
+
+        .event-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .event-id {
+            color: #666;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .risk-badge {
+            padding: 7px 11px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            border-radius: 2px;
+        }
+
+        .badge-critical {
+            background: rgba(255, 47, 31, 0.09);
+            color: #ff3b20;
+            border: 1px solid #5c211b;
+        }
+
+        .badge-high {
+            background: rgba(255, 120, 0, 0.09);
+            color: #ff8a20;
+            border: 1px solid #5c3518;
+        }
+
+        .badge-moderate {
+            background: rgba(255, 208, 0, 0.07);
+            color: #ffd000;
+            border: 1px solid #5b4d13;
+        }
+
+        .badge-low {
+            background: rgba(53, 228, 123, 0.06);
+            color: #35e47b;
+            border: 1px solid #245d3c;
+        }
+
+        .event-card h2 {
+            margin: 20px 0 8px;
+            font-size: 25px;
+            line-height: 1.15;
+        }
+
+        .location {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 19px;
+        }
+
+        .event-description {
+            color: #777;
+            line-height: 1.65;
+            font-size: 13px;
+            min-height: 62px;
+        }
+
+        /* =========================================================
+           METRICS
+        ========================================================= */
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 9px;
+            margin: 21px 0;
+        }
+
+        .metric {
+            background: #0d0d0d;
+            border: 1px solid #1e1e1e;
+            padding: 14px;
+            min-width: 0;
+        }
+
+        .metric-label {
+            color: #555;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+
+        .metric-value {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .view-btn {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            border: 1px solid #303030;
+            color: #ddd;
+            letter-spacing: 1.5px;
+            font-size: 10px;
+            font-weight: 700;
+            transition: 0.25s;
+        }
+
+        .view-btn:hover {
+            background: #180604;
+            border-color: #ff3b20;
+            color: #fff;
+        }
+
+        /* =========================================================
+           NO RESULTS
+        ========================================================= */
+
+        .no-results {
+            display: none;
+            padding: 80px 20px;
+            text-align: center;
+            border: 1px solid #222;
+            background: #080808;
+        }
+
+        .no-results.show {
+            display: block;
+        }
+
+        .no-results-title {
+            color: #aaa;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .no-results-text {
+            color: #555;
+            font-size: 12px;
+        }
+
+        /* =========================================================
+           MODAL
+        ========================================================= */
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            background: rgba(0, 0, 0, 0.86);
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: min(760px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #090909;
+            border: 1px solid #333;
+            padding: 38px;
+            position: relative;
+            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.6);
+        }
+
+        .close {
+            position: absolute;
+            right: 23px;
+            top: 17px;
+            font-size: 27px;
+            color: #666;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: white;
+        }
+
+        .modal-eyebrow {
+            color: #ff6a00;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 3px;
+        }
+
+        .modal-box h2 {
+            font-size: 38px;
+            margin: 12px 0 7px;
+        }
+
+        .modal-location {
+            color: #777;
+            margin-bottom: 28px;
+        }
+
+        .modal-status {
+            display: inline-block;
+            padding: 7px 11px;
+            border: 1px solid #333;
+            color: #aaa;
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .analysis {
+            border: 1px solid #292929;
+            padding: 22px;
+            margin-top: 20px;
+        }
+
+        .analysis-title {
+            color: #ff6a00;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .analysis p {
+            color: #aaa;
+            line-height: 1.8;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .recommendation {
+            margin-top: 20px;
+            border: 1px solid #4d2019;
+            background: rgba(255, 59, 32, 0.045);
+            padding: 22px;
+        }
+
+        .recommendation strong {
+            color: #ff3b20;
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .recommendation p {
+            color: #aaa;
+            line-height: 1.7;
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        .footer {
+            border-top: 1px solid #1c1c1c;
+            padding: 42px 5.5%;
+            color: #444;
+            font-size: 9px;
+            letter-spacing: 3px;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1100px) {
+            .nav-links {
+                gap: 22px;
+                margin-right: 25px;
+            }
+
+            .summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .navbar {
+                height: 75px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 60px 6% 55px;
+            }
+
+            .page {
+                width: 88%;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filters {
+                flex-wrap: wrap;
+            }
+
+            input {
+                flex: 1;
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .status {
+                padding: 10px 13px;
+                font-size: 9px;
+            }
+
+            .status-dot {
+                margin-right: 5px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+                letter-spacing: -3px;
+            }
+
+            .hero p {
+                font-size: 14px;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            input,
+            select {
+                width: 100%;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                padding: 10px;
+            }
+
+            .modal-box {
+                padding: 27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVBAR
+========================================================= -->
+
+<header class="navbar">
+
+    <div class="logo">
+        <span class="logo-icon">🔥</span>
+        <span>FIREGUARD</span>
+        <span class="logo-ai">AI</span>
+    </div>
+
+    <nav class="nav-links">
+        <a href="index.html">COMMAND</a>
+        <a href="map.html">LIVE MAP</a>
+        <a href="events.html" class="active">EVENTS</a>
+        <a href="analyst.html">AI ANALYST</a>
+        <a href="analytics.html">ANALYTICS</a>
+        <a href="alerts.html">ALERTS</a>
+        <a href="reports.html">REPORTS</a>
+    </nav>
+
+    <div class="status">
+        <span class="status-dot"></span>
+        SYSTEM ONLINE
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero">
+
+    <div class="eyebrow">
+        03 / INCIDENT INTELLIGENCE
+    </div>
+
+    <h1>
+        FIRE <span>EVENTS.</span>
+    </h1>
+
+    <p>
+        AI-assisted detection and prioritization of potential fire,
+        thermal and industrial anomalies across monitored regions.
+    </p>
+
+</section>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="page">
+
+    <!-- SUMMARY -->
+
+    <section class="summary">
+
+        <div class="summary-card">
+            <div class="summary-number" id="totalEvents">0</div>
+            <div class="summary-label">TOTAL EVENTS</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-number red" id="criticalEvents">0</div>
+            <div class="summary-label">CRITICAL</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-number orange" id="highEvents">0</div>
+            <div class="summary-label">HIGH RISK</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-number green" id="activeEvents">0</div>
+            <div class="summary-label">ACTIVE</div>
+        </div>
+
+    </section>
+
+
+    <!-- TOOLBAR -->
+
+    <section class="toolbar">
+
+        <div class="toolbar-heading">
+
+            <div class="toolbar-title">
+                EVENT INTELLIGENCE
+
+                <span class="event-count" id="eventCount">
+                    LOADING...
+                </span>
+            </div>
+
+        </div>
+
+        <div class="filters">
+
+            <div class="search-box">
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Search events..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <select id="riskFilter">
+                <option value="ALL">ALL RISK LEVELS</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MODERATE">MODERATE</option>
+                <option value="LOW">LOW</option>
+            </select>
+
+            <select id="statusFilter">
+                <option value="ALL">ALL STATUS</option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="MONITORING">MONITORING</option>
+                <option value="RESOLVED">RESOLVED</option>
+            </select>
+
+        </div>
+
+    </section>
+
+
+    <!-- ERROR -->
+
+    <div id="errorBox" class="error-box">
+
+        <div class="error-title">
+            EVENT DATA UNAVAILABLE
+        </div>
+
+        <div id="errorText" class="error-text">
+            Unable to connect to the FireGuard backend.
+        </div>
+
+        <button
+            class="retry-btn"
+            id="retryButton"
+            type="button"
+        >
+            RETRY CONNECTION
+        </button>
+
+    </div>
+
+
+    <!-- LOADING -->
+
+    <div id="loading" class="loading">
+
+        <div class="loader"></div>
+
+        <div class="loading-title">
+            FIREGUARD EVENT ENGINE
+        </div>
+
+        <div class="loading-text">
+            Loading live event intelligence...
+        </div>
+
+    </div>
+
+
+    <!-- EVENTS -->
+
+    <section
+        class="events-grid"
+        id="eventsGrid"
+    ></section>
+
+
+    <!-- NO RESULTS -->
+
+    <div id="noResults" class="no-results">
+
+        <div class="no-results-title">
+            No matching events
+        </div>
+
+        <div class="no-results-text">
+            Try another search term or change the filters.
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================================
+     EVENT MODAL
+========================================================= -->
+
+<div
+    class="modal"
+    id="eventModal"
+    aria-hidden="true"
+>
+
+    <div class="modal-box">
+
+        <div
+            class="close"
+            id="closeModal"
+            aria-label="Close"
+        >
+            ×
+        </div>
+
+        <div class="modal-eyebrow">
+            AI EVENT INVESTIGATION
+        </div>
+
+        <h2 id="modalId">
+            FG-001
+        </h2>
+
+        <div
+            class="modal-location"
+            id="modalLocation"
+        >
+            📍 Chennai
+        </div>
+
+        <div
+            class="modal-status"
+            id="modalStatus"
+        >
+            ACTIVE
+        </div>
+
+        <div class="metrics">
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    RISK LEVEL
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="modalRisk"
+                >
+                    CRITICAL
+                </div>
+
+            </div>
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    TEMPERATURE
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="modalTemperature"
+                >
+                    67.4°C
+                </div>
+
+            </div>
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    AI CONFIDENCE
+                </div>
+
+                <div
+                    class="metric-value"
+                    id="modalConfidence"
+                >
+                    94%
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="analysis">
+
+            <div class="analysis-title">
+                AI ANALYSIS
+            </div>
+
+            <p id="analysisText">
+                Loading event analysis...
+            </p>
+
+        </div>
+
+
+        <div class="recommendation">
+
+            <strong>
+                RECOMMENDED ACTION
+            </strong>
+
+            <p id="recommendationText">
+                Loading recommended response...
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="footer">
+    FIREGUARD AI &nbsp; / &nbsp;
+    SATELLITE FIRE INTELLIGENCE &nbsp; / &nbsp;
+    INCIDENT OPERATIONS
+</footer>
+
+
+<script>
+    /* =========================================================
+       CONFIGURATION
+    ========================================================= */
+
+    const API_URL = "http://127.0.0.1:5000/api/events";
+
+    let allEvents = [];
+    let isLoading = false;
+    let refreshTimer = null;
+
+
+    /* =========================================================
+       DOM REFERENCES
+    ========================================================= */
+
+    const loading = document.getElementById("loading");
+    const errorBox = document.getElementById("errorBox");
+    const errorText = document.getElementById("errorText");
+    const eventsGrid = document.getElementById("eventsGrid");
+    const noResults = document.getElementById("noResults");
+
+    const searchInput = document.getElementById("searchInput");
+    const riskFilter = document.getElementById("riskFilter");
+    const statusFilter = document.getElementById("statusFilter");
+
+    const eventModal = document.getElementById("eventModal");
+    const closeModalButton = document.getElementById("closeModal");
+    const retryButton = document.getElementById("retryButton");
+
+
+    /* =========================================================
+       SAFE HTML
+    ========================================================= */
+
+    function escapeHTML(value) {
+
+        if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    /* =========================================================
+       NORMALIZE EVENT DATA
+    ========================================================= */
+
+    function normalizeEvent(event, index) {
+
+        const severity =
+            String(event?.severity || "LOW").toUpperCase();
+
+        const status =
+            String(event?.status || "MONITORING").toUpperCase();
+
+        return {
+            ...event,
+
+            id:
+                event?.id ||
+                `FG-${String(index + 1).padStart(3, "0")}`,
+
+            region:
+                event?.region ||
+                event?.city ||
+                "Unknown Region",
+
+            type:
+                event?.type ||
+                "Thermal Anomaly",
+
+            severity,
+
+            status,
+
+            temperature:
+                event?.temperature ??
+                "N/A",
+
+            confidence:
+                event?.confidence ??
+                "N/A"
+        };
+    }
+
+
+    /* =========================================================
+       RISK CLASS
+    ========================================================= */
+
+    function getRiskClass(severity) {
+
+        const value =
+            String(severity || "LOW").toLowerCase();
+
+        if (
+            ["critical", "high", "moderate", "low"]
+                .includes(value)
+        ) {
+            return value;
+        }
+
+        return "low";
+    }
+
+
+    /* =========================================================
+       DESCRIPTION
+    ========================================================= */
+
+    function getEventDescription(event) {
+
+        const type =
+            String(event.type || "").toLowerCase();
+
+        const severity =
+            String(event.severity || "LOW").toLowerCase();
+
+        if (type.includes("industrial")) {
+            return (
+                "Thermal activity detected near industrial " +
+                "infrastructure with potential fire-risk implications."
+            );
+        }
+
+        if (
+            type.includes("population") ||
+            type.includes("urban")
+        ) {
+            return (
+                "Elevated thermal activity detected near " +
+                "populated infrastructure."
+            );
+        }
+
+        if (type.includes("environmental")) {
+            return (
+                "Environmental thermal signal detected " +
+                "with monitoring required."
+            );
+        }
+
+        if (type.includes("spike")) {
+            return (
+                "Rapid thermal increase detected " +
+                "requiring additional verification."
+            );
+        }
+
+        if (severity === "critical") {
+            return (
+                "Critical thermal activity detected. " +
+                "Immediate operational verification is recommended."
+            );
+        }
+
+        if (severity === "high") {
+            return (
+                "High-priority thermal signal detected. " +
+                "Additional verification is recommended."
+            );
+        }
+
+        if (severity === "moderate") {
+            return (
+                "Moderate thermal signal detected. " +
+                "Continued observation is recommended."
+            );
+        }
+
+        return (
+            "Thermal signal detected across monitored observations. " +
+            "Routine monitoring and verification are recommended."
+        );
+    }
+
+
+    /* =========================================================
+       RECOMMENDATION
+    ========================================================= */
+
+    function getRecommendation(event) {
+
+        const risk =
+            String(event.severity || "LOW").toUpperCase();
+
+        const status =
+            String(event.status || "MONITORING").toUpperCase();
+
+        if (status === "RESOLVED") {
+            return (
+                "Event is currently resolved. Maintain historical " +
+                "tracking and re-evaluate if a new thermal signal " +
+                "appears in the same region."
+            );
+        }
+
+        if (risk === "CRITICAL") {
+            return (
+                "Immediately prioritize field verification, " +
+                "continue high-frequency monitoring, assess nearby " +
+                "infrastructure and escalate if the event is confirmed."
+            );
+        }
+
+        if (risk === "HIGH") {
+            return (
+                "Prioritize field verification, increase monitoring " +
+                "frequency and assess nearby infrastructure and " +
+                "population exposure."
+            );
+        }
+
+        if (risk === "MODERATE") {
+            return (
+                "Continue monitoring the event and verify the thermal " +
+                "signal using additional observations."
+            );
+        }
+
+        return (
+            "Continue routine monitoring and verify the signal if " +
+            "its intensity or persistence increases."
+        );
+    }
+
+
+    /* =========================================================
+       LOAD EVENTS
+    ========================================================= */
+
+    async function loadEvents() {
+
+        if (isLoading) {
+            return;
+        }
+
+        isLoading = true;
+
+        loading.style.display = "flex";
+        errorBox.classList.remove("show");
+
+        try {
+
+            const response = await fetch(API_URL, {
+                method: "GET",
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Backend returned HTTP ${response.status}`
+                );
+            }
+
+            const data = await response.json();
+
+            if (!data || !Array.isArray(data.events)) {
+                throw new Error(
+                    "Invalid event data received from backend."
+                );
+            }
+
+            allEvents =
+                data.events.map(normalizeEvent);
+
+            updateSummary(allEvents);
+            applyFilters();
+
+        } catch (error) {
+
+            console.error(
+                "FireGuard Events API error:",
+                error
+            );
+
+            errorText.textContent =
+                "Unable to load events from the FireGuard backend. " +
+                error.message;
+
+            errorBox.classList.add("show");
+
+        } finally {
+
+            loading.style.display = "none";
+            isLoading = false;
+        }
+    }
+
+
+    /* =========================================================
+       SUMMARY
+    ========================================================= */
+
+    function updateSummary(events) {
+
+        const total =
+            events.length;
+
+        const critical =
+            events.filter(
+                event =>
+                    event.severity === "CRITICAL"
+            ).length;
+
+        const high =
+            events.filter(
+                event =>
+                    event.severity === "HIGH"
+            ).length;
+
+        const active =
+            events.filter(
+                event =>
+                    event.status === "ACTIVE"
+            ).length;
+
+        document.getElementById(
+            "totalEvents"
+        ).textContent = total;
+
+        document.getElementById(
+            "criticalEvents"
+        ).textContent = critical;
+
+        document.getElementById(
+            "highEvents"
+        ).textContent = high;
+
+        document.getElementById(
+            "activeEvents"
+        ).textContent = active;
+    }
+
+
+    /* =========================================================
+       FILTER EVENTS
+    ========================================================= */
+
+    function applyFilters() {
+
+        const search =
+            searchInput.value
+                .trim()
+                .toLowerCase();
+
+        const selectedRisk =
+            riskFilter.value;
+
+        const selectedStatus =
+            statusFilter.value;
+
+        const filtered =
+            allEvents.filter(event => {
+
+                const searchable =
+                    [
+                        event.id,
+                        event.region,
+                        event.type,
+                        event.status,
+                        event.severity,
+                        event.temperature
+                    ]
+                        .join(" ")
+                        .toLowerCase();
+
+                const matchesSearch =
+                    searchable.includes(search);
+
+                const matchesRisk =
+                    selectedRisk === "ALL" ||
+                    event.severity === selectedRisk;
+
+                const matchesStatus =
+                    selectedStatus === "ALL" ||
+                    event.status === selectedStatus;
+
+                return (
+                    matchesSearch &&
+                    matchesRisk &&
+                    matchesStatus
+                );
+            });
+
+        renderEvents(filtered);
+
+        document.getElementById(
+            "eventCount"
+        ).textContent =
+            `${filtered.length} MATCHING EVENTS`;
+    }
+
+
+    /* =========================================================
+       RENDER EVENTS
+    ========================================================= */
+
+    function renderEvents(events) {
+
+        eventsGrid.innerHTML = "";
+
+        if (!events || events.length === 0) {
+
+            noResults.classList.add("show");
+
+            return;
+        }
+
+        noResults.classList.remove("show");
+
+        const fragment =
+            document.createDocumentFragment();
+
+        events.forEach(event => {
+
+            const severity =
+                String(
+                    event.severity || "LOW"
+                ).toUpperCase();
+
+            const riskClass =
+                getRiskClass(severity);
+
+            const card =
+                document.createElement("article");
+
+            card.className =
+                `event-card ${riskClass}`;
+
+            card.innerHTML = `
+
+                <div class="event-top">
+
+                    <div class="event-id">
+                        ${escapeHTML(event.id)}
+                    </div>
+
+                    <div class="
+                        risk-badge
+                        badge-${riskClass}
+                    ">
+                        ${escapeHTML(severity)}
+                    </div>
+
+                </div>
+
+                <h2>
+                    ${escapeHTML(event.type)}
+                </h2>
+
+                <div class="location">
+                    📍 ${escapeHTML(event.region)}
+                </div>
+
+                <div class="event-description">
+                    ${escapeHTML(
+                        getEventDescription(event)
+                    )}
+                </div>
+
+                <div class="metrics">
+
+                    <div class="metric">
+
+                        <div class="metric-label">
+                            TEMPERATURE
+                        </div>
+
+                        <div class="
+                            metric-value
+                            ${
+                                severity === "CRITICAL"
+                                    ? "red"
+                                    : severity === "HIGH"
+                                        ? "orange"
+                                        : severity === "MODERATE"
+                                            ? "yellow"
+                                            : "green"
+                            }
+                        ">
+                            ${escapeHTML(event.temperature)}
+                        </div>
+
+                    </div>
+
+                    <div class="metric">
+
+                        <div class="metric-label">
+                            CONFIDENCE
+                        </div>
+
+                        <div class="metric-value">
+                            ${escapeHTML(event.confidence)}
+                        </div>
+
+                    </div>
+
+                    <div class="metric">
+
+                        <div class="metric-label">
+                            STATUS
+                        </div>
+
+                        <div class="metric-value">
+                            ${escapeHTML(event.status)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button
+                    class="view-btn"
+                    type="button"
+                    data-event-id="${escapeHTML(event.id)}"
+                >
+                    INVESTIGATE EVENT →
+                </button>
+            `;
+
+            const button =
+                card.querySelector(".view-btn");
+
+            button.addEventListener(
+                "click",
+                () => openEvent(event)
+            );
+
+            fragment.appendChild(card);
+        });
+
+        eventsGrid.appendChild(fragment);
+    }
+
+
+    /* =========================================================
+       OPEN EVENT MODAL
+    ========================================================= */
+
+    function openEvent(event) {
+
+        document.getElementById(
+            "modalId"
+        ).textContent =
+            event.id;
+
+        document.getElementById(
+            "modalLocation"
+        ).textContent =
+            `📍 ${event.region}`;
+
+        document.getElementById(
+            "modalStatus"
+        ).textContent =
+            event.status;
+
+        document.getElementById(
+            "modalRisk"
+        ).textContent =
+            event.severity;
+
+        document.getElementById(
+            "modalTemperature"
+        ).textContent =
+            event.temperature;
+
+        document.getElementById(
+            "modalConfidence"
+        ).textContent =
+            event.confidence;
+
+        document.getElementById(
+            "analysisText"
+        ).textContent =
+            getEventAnalysis(event);
+
+        document.getElementById(
+            "recommendationText"
+        ).textContent =
+            getRecommendation(event);
+
+        eventModal.classList.add("show");
+        eventModal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        document.body.style.overflow = "hidden";
+    }
+
+
+    /* =========================================================
+       EVENT ANALYSIS
+    ========================================================= */
+
+    function getEventAnalysis(event) {
+
+        const temperature =
+            event.temperature || "N/A";
+
+        const confidence =
+            event.confidence || "N/A";
+
+        const risk =
+            String(
+                event.severity || "LOW"
+            ).toLowerCase();
+
+        const status =
+            String(
+                event.status || "MONITORING"
+            ).toLowerCase();
+
+        return (
+            `FireGuard AI identified a ${risk} ` +
+            `${String(event.type || "thermal event").toLowerCase()} ` +
+            `in ${event.region}. ` +
+            `The observed thermal signal is ${temperature} ` +
+            `with an AI confidence of ${confidence}. ` +
+            `The event is currently marked ${status}. ` +
+            `Operational review should consider the event's ` +
+            `severity, persistence and surrounding exposure.`
+        );
+    }
+
+
+    /* =========================================================
+       CLOSE EVENT
+    ========================================================= */
+
+    function closeEvent() {
+
+        eventModal.classList.remove("show");
+
+        eventModal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        document.body.style.overflow = "";
+    }
+
+
+    /* =========================================================
+       EVENT LISTENERS
+    ========================================================= */
+
+    searchInput.addEventListener(
+        "input",
+        applyFilters
+    );
+
+    riskFilter.addEventListener(
+        "change",
+        applyFilters
+    );
+
+    statusFilter.addEventListener(
+        "change",
+        applyFilters
+    );
+
+    retryButton.addEventListener(
+        "click",
+        loadEvents
+    );
+
+    closeModalButton.addEventListener(
+        "click",
+        closeEvent
+    );
+
+    eventModal.addEventListener(
+        "click",
+        event => {
+
+            if (event.target === eventModal) {
+                closeEvent();
+            }
+
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Escape") {
+                closeEvent();
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       INITIAL LOAD
+    ========================================================= */
+
+    loadEvents();
+
+
+    /* =========================================================
+       AUTO REFRESH
+       Every 30 seconds, but only after the previous
+       request has finished.
+    ========================================================= */
+
+    refreshTimer =
+        setInterval(
+            loadEvents,
+            30000
+        );
+
+</script>
+
+</body>
+</html>

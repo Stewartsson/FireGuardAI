@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FireGuard AI — Analytics</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #050505;
+            color: #f5f5f5;
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        header {
+            height: 96px;
+            border-bottom: 1px solid #202020;
+            display: flex;
+            align-items: center;
+            padding: 0 5%;
+            justify-content: space-between;
+            background: #050505;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .logo-fire {
+            margin-right: 10px;
+        }
+
+        .logo-ai {
+            color: #ff3b24;
+        }
+
+        nav {
+            display: flex;
+            gap: 34px;
+            align-items: center;
+        }
+
+        nav a {
+            color: #777;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+
+        nav a:hover {
+            color: #fff;
+        }
+
+        nav a.active {
+            color: #fff;
+        }
+
+        .system-status {
+            border: 1px solid #292929;
+            border-radius: 30px;
+            padding: 13px 22px;
+            color: #ddd;
+            font-size: 12px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #20e879;
+            margin-right: 10px;
+            box-shadow: 0 0 12px rgba(32, 232, 121, 0.7);
+        }
+
+        /* ================================
+           HERO
+        ================================= */
+
+        .hero {
+            padding: 70px 5% 65px;
+            border-bottom: 1px solid #202020;
+            background:
+                radial-gradient(
+                    circle at 85% 30%,
+                    rgba(255, 59, 36, 0.09),
+                    transparent 35%
+                );
+        }
+
+        .eyebrow {
+            color: #ff7a00;
+            font-size: 12px;
+            letter-spacing: 6px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .hero h1 {
+            font-size: clamp(55px, 7vw, 100px);
+            line-height: 0.95;
+            letter-spacing: -4px;
+            max-width: 1000px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 span {
+            color: #ff3b24;
+        }
+
+        .hero p {
+            margin-top: 35px;
+            max-width: 850px;
+            color: #8a8a8a;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        /* ================================
+           MAIN
+        ================================= */
+
+        main {
+            width: 90%;
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 55px 0 100px;
+        }
+
+        /* ================================
+           KPI CARDS
+        ================================= */
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .kpi {
+            border: 1px solid #252525;
+            background: #090909;
+            padding: 30px;
+            min-height: 155px;
+        }
+
+        .kpi-label {
+            color: #777;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .kpi-value {
+            font-size: 48px;
+            font-weight: 800;
+        }
+
+        .kpi-value.red {
+            color: #ff3b24;
+        }
+
+        .kpi-value.orange {
+            color: #ff8500;
+        }
+
+        .kpi-value.yellow {
+            color: #ffd400;
+        }
+
+        .kpi-value.green {
+            color: #20e879;
+        }
+
+        .kpi-small {
+            margin-top: 12px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        /* ================================
+           SECTION HEADERS
+        ================================= */
+
+        .section {
+            margin-top: 45px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title h2 {
+            font-size: 21px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .section-title span {
+            color: #666;
+            font-size: 11px;
+            letter-spacing: 3px;
+        }
+
+        /* ================================
+           PANELS
+        ================================= */
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            border: 1px solid #252525;
+            background: #080808;
+            padding: 30px;
+        }
+
+        /* ================================
+           RISK DISTRIBUTION
+        ================================= */
+
+        .risk-row {
+            margin-bottom: 24px;
+        }
+
+        .risk-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 9px;
+        }
+
+        .risk-name {
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .risk-count {
+            color: #777;
+            font-size: 12px;
+        }
+
+        .bar {
+            height: 9px;
+            background: #191919;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+
+        .critical {
+            background: #ff3b24;
+        }
+
+        .high {
+            background: #ff8500;
+        }
+
+        .moderate {
+            background: #ffd400;
+        }
+
+        .low {
+            background: #20e879;
+        }
+
+        /* ================================
+           REGIONAL RISK
+        ================================= */
+
+        .region-row {
+            margin-bottom: 25px;
+        }
+
+        .region-head {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 9px;
+        }
+
+        .region-name {
+            font-size: 14px;
+        }
+
+        .region-risk {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #777;
+        }
+
+        .region-bar {
+            height: 8px;
+            background: #181818;
+        }
+
+        .region-fill {
+            height: 100%;
+            width: 0;
+            background: #ff3b24;
+            transition: width 0.8s ease;
+        }
+
+        /* ================================
+           THERMAL CHART
+        ================================= */
+
+        .thermal-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            height: 300px;
+            padding-top: 30px;
+        }
+
+        .thermal-column {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .thermal-value {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        .thermal-bar {
+            width: 100%;
+            max-width: 70px;
+            height: 0;
+            background: linear-gradient(
+                to top,
+                #ff8500,
+                #ff3b24
+            );
+            transition: height 1s ease;
+        }
+
+        .thermal-label {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* ================================
+           STATUS
+        ================================= */
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .status-box {
+            border: 1px solid #222;
+            background: #0c0c0c;
+            padding: 25px;
+        }
+
+        .status-box .number {
+            font-size: 38px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .status-box .label {
+            color: #777;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ================================
+           RECENT EVENTS
+        ================================= */
+
+        .event-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .event-table th {
+            text-align: left;
+            color: #555;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 15px;
+            border-bottom: 1px solid #252525;
+        }
+
+        .event-table td {
+            padding: 17px 15px;
+            border-bottom: 1px solid #181818;
+            font-size: 13px;
+        }
+
+        .severity {
+            font-size: 10px;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .severity-critical {
+            color: #ff3b24;
+        }
+
+        .severity-high {
+            color: #ff8500;
+        }
+
+        .severity-moderate {
+            color: #ffd400;
+        }
+
+        .severity-low {
+            color: #20e879;
+        }
+
+        /* ================================
+           AI INSIGHT
+        ================================= */
+
+        .insight {
+            border: 1px solid #42211c;
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(255, 59, 36, 0.08),
+                    transparent
+                );
+            padding: 35px;
+        }
+
+        .insight-label {
+            color: #ff7a00;
+            font-size: 11px;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+
+        .insight-text {
+            color: #aaa;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        /* ================================
+           LOADING / ERROR
+        ================================= */
+
+        .loading {
+            padding: 50px;
+            text-align: center;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        .error {
+            border: 1px solid #55201a;
+            background: rgba(255, 59, 36, 0.06);
+            color: #ff6b57;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        /* ================================
+           RESPONSIVE
+        ================================= */
+
+        @media (max-width: 1100px) {
+            nav {
+                gap: 15px;
+            }
+
+            .system-status {
+                display: none;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            header {
+                height: auto;
+                min-height: 80px;
+                padding: 20px 5%;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            nav {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+
+            .hero {
+                padding-top: 50px;
+            }
+
+            .hero h1 {
+                font-size: 55px;
+                letter-spacing: -2px;
+            }
+
+            .panel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .event-table {
+                min-width: 700px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 43px;
+            }
+
+            main {
+                width: 92%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <a href="index.html" class="logo">
+        <span class="logo-fire">🔥</span>
+        FIREGUARD <span class="logo-ai">AI</span>
+    </a>
+
+    <nav>
+        <a href="index.html">Command</a>
+        <a href="map.html">Live Map</a>
+        <a href="events.html">Events</a>
+        <a href="analyst.html">AI Analyst</a>
+        <a href="analytics.html" class="active">Analytics</a>
+        <a href="alerts.html">Alerts</a>
+        <a href="reports.html">Reports</a>
+    </nav>
+
+    <div class="system-status">
+        <span class="status-dot"></span>
+        SYSTEM ONLINE
+    </div>
+
+</header>
+
+
+<section class="hero">
+
+    <div class="eyebrow">
+        06 / OPERATIONAL ANALYTICS
+    </div>
+
+    <h1>
+        SEE THE <span>RISK.</span>
+    </h1>
+
+    <p>
+        FireGuard AI transforms detected events and response alerts
+        into operational intelligence across monitored regions.
+    </p>
+
+</section>
+
+
+<main>
+
+    <div id="errorBox" class="error"></div>
+
+
+    <!-- ================================
+         KPI
+    ================================= -->
+
+    <section>
+
+        <div class="kpi-grid">
+
+            <div class="kpi">
+                <div class="kpi-label">
+                    Total Events
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="totalEvents"
+                >
+                    —
+                </div>
+
+                <div class="kpi-small">
+                    Events detected by FireGuard AI
+                </div>
+            </div>
+
+
+            <div class="kpi">
+                <div class="kpi-label">
+                    Active Alerts
+                </div>
+
+                <div
+                    class="kpi-value red"
+                    id="activeAlerts"
+                >
+                    —
+                </div>
+
+                <div class="kpi-small">
+                    Alerts requiring attention
+                </div>
+            </div>
+
+
+            <div class="kpi">
+                <div class="kpi-label">
+                    Peak Temperature
+                </div>
+
+                <div
+                    class="kpi-value orange"
+                    id="peakTemperature"
+                >
+                    —
+                </div>
+
+                <div class="kpi-small">
+                    Highest detected thermal signal
+                </div>
+            </div>
+
+
+            <div class="kpi">
+                <div class="kpi-label">
+                    Average Confidence
+                </div>
+
+                <div
+                    class="kpi-value green"
+                    id="averageConfidence"
+                >
+                    —
+                </div>
+
+                <div class="kpi-small">
+                    Across detected events
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================
+         RISK + STATUS
+    ================================= -->
+
+    <section class="section">
+
+        <div class="section-title">
+            <h2>Risk Distribution</h2>
+            <span>EVENT SEVERITY</span>
+        </div>
+
+        <div class="panel-grid">
+
+            <div class="panel">
+
+                <div class="risk-row">
+
+                    <div class="risk-top">
+                        <span class="risk-name">
+                            Critical
+                        </span>
+
+                        <span
+                            class="risk-count"
+                            id="criticalCount"
+                        >
+                            0
+                        </span>
+                    </div>
+
+                    <div class="bar">
+                        <div
+                            class="bar-fill critical"
+                            id="criticalBar"
+                        ></div>
+                    </div>
+
+                </div>
+
+
+                <div class="risk-row">
+
+                    <div class="risk-top">
+                        <span class="risk-name">
+                            High
+                        </span>
+
+                        <span
+                            class="risk-count"
+                            id="highCount"
+                        >
+                            0
+                        </span>
+                    </div>
+
+                    <div class="bar">
+                        <div
+                            class="bar-fill high"
+                            id="highBar"
+                        ></div>
+                    </div>
+
+                </div>
+
+
+                <div class="risk-row">
+
+                    <div class="risk-top">
+                        <span class="risk-name">
+                            Moderate
+                        </span>
+
+                        <span
+                            class="risk-count"
+                            id="moderateCount"
+                        >
+                            0
+                        </span>
+                    </div>
+
+                    <div class="bar">
+                        <div
+                            class="bar-fill moderate"
+                            id="moderateBar"
+                        ></div>
+                    </div>
+
+                </div>
+
+
+                <div class="risk-row">
+
+                    <div class="risk-top">
+                        <span class="risk-name">
+                            Low
+                        </span>
+
+                        <span
+                            class="risk-count"
+                            id="lowCount"
+                        >
+                            0
+                        </span>
+                    </div>
+
+                    <div class="bar">
+                        <div
+                            class="bar-fill low"
+                            id="lowBar"
+                        ></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="section-title">
+                    <h2>Event Status</h2>
+                </div>
+
+                <div class="status-grid">
+
+                    <div class="status-box">
+
+                        <div
+                            class="number"
+                            id="activeEvents"
+                        >
+                            0
+                        </div>
+
+                        <div class="label">
+                            Active
+                        </div>
+
+                    </div>
+
+
+                    <div class="status-box">
+
+                        <div
+                            class="number"
+                            id="monitoringEvents"
+                        >
+                            0
+                        </div>
+
+                        <div class="label">
+                            Monitoring
+                        </div>
+
+                    </div>
+
+
+                    <div class="status-box">
+
+                        <div
+                            class="number"
+                            id="resolvedEvents"
+                        >
+                            0
+                        </div>
+
+                        <div class="label">
+                            Resolved
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================
+         REGIONAL RISK
+    ================================= -->
+
+    <section class="section">
+
+        <div class="section-title">
+            <h2>Regional Risk</h2>
+            <span>MONITORED REGIONS</span>
+        </div>
+
+        <div class="panel">
+
+            <div id="regionalRisk">
+
+                <div class="loading">
+                    Loading regional intelligence...
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================
+         THERMAL ACTIVITY
+    ================================= -->
+
+    <section class="section">
+
+        <div class="section-title">
+            <h2>Thermal Activity</h2>
+            <span>DETECTED TEMPERATURES</span>
+        </div>
+
+        <div class="panel">
+
+            <div
+                class="thermal-chart"
+                id="thermalChart"
+            >
+                <div class="loading">
+                    Loading thermal data...
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================
+         RECENT EVENTS
+    ================================= -->
+
+    <section class="section">
+
+        <div class="section-title">
+            <h2>Recent Events</h2>
+
+            <span id="eventCountLabel">
+                LOADING
+            </span>
+        </div>
+
+        <div class="panel table-wrapper">
+
+            <table class="event-table">
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>TYPE</th>
+                        <th>REGION</th>
+                        <th>TEMPERATURE</th>
+                        <th>CONFIDENCE</th>
+                        <th>SEVERITY</th>
+                        <th>STATUS</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="eventTableBody">
+
+                    <tr>
+                        <td colspan="7">
+                            <div class="loading">
+                                Loading events...
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================
+         AI INSIGHT
+    ================================= -->
+
+    <section class="section">
+
+        <div class="insight">
+
+            <div class="insight-label">
+                FIREGUARD AI / OPERATIONAL INSIGHT
+            </div>
+
+            <div
+                class="insight-text"
+                id="aiInsight"
+            >
+                Analyzing current event and alert conditions...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    const API_BASE = "http://127.0.0.1:5000";
+
+
+    /* ==========================================
+       HELPERS
+    ========================================== */
+
+    function showError(message) {
+
+        const box = document.getElementById("errorBox");
+
+        box.textContent = message;
+
+        box.style.display = "block";
+    }
+
+
+    function parseNumber(value) {
+
+        if (typeof value === "number") {
+            return value;
+        }
+
+        if (!value) {
+            return 0;
+        }
+
+        return parseFloat(
+            String(value).replace(/[^\d.-]/g, "")
+        ) || 0;
+    }
+
+
+    function severityClass(severity) {
+
+        return (
+            "severity-" +
+            String(severity || "")
+                .toLowerCase()
+        );
+    }
+
+
+    /* ==========================================
+       LOAD EVENTS
+    ========================================== */
+
+    async function loadEvents() {
+
+        const response = await fetch(
+            API_BASE + "/api/events"
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "Unable to load events from backend."
+            );
+        }
+
+        const data = await response.json();
+
+        return data.events || [];
+    }
+
+
+    /* ==========================================
+       LOAD ALERTS
+    ========================================== */
+
+    async function loadAlerts() {
+
+        const response = await fetch(
+            API_BASE + "/api/alerts"
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "Unable to load alerts from backend."
+            );
+        }
+
+        const data = await response.json();
+
+        return data.alerts || [];
+    }
+
+
+    /* ==========================================
+       KPI
+    ========================================== */
+
+    function updateKPIs(events, alerts) {
+
+        document.getElementById(
+            "totalEvents"
+        ).textContent = events.length;
+
+
+        const activeAlerts = alerts.filter(
+            alert =>
+                String(alert.status).toUpperCase()
+                === "ACTIVE"
+        ).length;
+
+
+        document.getElementById(
+            "activeAlerts"
+        ).textContent = activeAlerts;
+
+
+        const temperatures = events.map(
+            event => parseNumber(event.temperature)
+        );
+
+
+        const peak = temperatures.length
+            ? Math.max(...temperatures)
+            : 0;
+
+
+        document.getElementById(
+            "peakTemperature"
+        ).textContent =
+            peak.toFixed(1) + "°C";
+
+
+        const confidences = events.map(
+            event => parseNumber(event.confidence)
+        );
+
+
+        const average =
+            confidences.length
+                ? confidences.reduce(
+                    (sum, value) =>
+                        sum + value,
+                    0
+                ) / confidences.length
+                : 0;
+
+
+        document.getElementById(
+            "averageConfidence"
+        ).textContent =
+            Math.round(average) + "%";
+    }
+
+
+    /* ==========================================
+       RISK DISTRIBUTION
+    ========================================== */
+
+    function updateRiskDistribution(events) {
+
+        const levels = [
+            "CRITICAL",
+            "HIGH",
+            "MODERATE",
+            "LOW"
+        ];
+
+
+        const counts = {};
+
+        levels.forEach(
+            level => {
+                counts[level] = events.filter(
+                    event =>
+                        String(event.severity)
+                            .toUpperCase()
+                        === level
+                ).length;
+            }
+        );
+
+
+        const total = events.length || 1;
+
+
+        document.getElementById(
+            "criticalCount"
+        ).textContent = counts.CRITICAL;
+
+
+        document.getElementById(
+            "highCount"
+        ).textContent = counts.HIGH;
+
+
+        document.getElementById(
+            "moderateCount"
+        ).textContent = counts.MODERATE;
+
+
+        document.getElementById(
+            "lowCount"
+        ).textContent = counts.LOW;
+
+
+        setTimeout(() => {
+
+            document.getElementById(
+                "criticalBar"
+            ).style.width =
+                (counts.CRITICAL / total * 100)
+                + "%";
+
+
+            document.getElementById(
+                "highBar"
+            ).style.width =
+                (counts.HIGH / total * 100)
+                + "%";
+
+
+            document.getElementById(
+                "moderateBar"
+            ).style.width =
+                (counts.MODERATE / total * 100)
+                + "%";
+
+
+            document.getElementById(
+                "lowBar"
+            ).style.width =
+                (counts.LOW / total * 100)
+                + "%";
+
+        }, 100);
+    }
+
+
+    /* ==========================================
+       EVENT STATUS
+    ========================================== */
+
+    function updateEventStatus(events) {
+
+        const active = events.filter(
+            event =>
+                String(event.status).toUpperCase()
+                === "ACTIVE"
+        ).length;
+
+
+        const monitoring = events.filter(
+            event =>
+                String(event.status).toUpperCase()
+                === "MONITORING"
+        ).length;
+
+
+        const resolved = events.filter(
+            event =>
+                String(event.status).toUpperCase()
+                === "RESOLVED"
+        ).length;
+
+
+        document.getElementById(
+            "activeEvents"
+        ).textContent = active;
+
+
+        document.getElementById(
+            "monitoringEvents"
+        ).textContent = monitoring;
+
+
+        document.getElementById(
+            "resolvedEvents"
+        ).textContent = resolved;
+    }
+
+
+    /* ==========================================
+       REGIONAL RISK
+    ========================================== */
+
+    function updateRegionalRisk(events) {
+
+        const container =
+            document.getElementById(
+                "regionalRisk"
+            );
+
+
+        const regions = {};
+
+
+        events.forEach(event => {
+
+            const region =
+                event.region || "Unknown";
+
+            if (!regions[region]) {
+                regions[region] = {
+                    count: 0,
+                    score: 0
+                };
+            }
+
+
+            regions[region].count++;
+
+
+            const severity =
+                String(
+                    event.severity || ""
+                ).toUpperCase();
+
+
+            const scoreMap = {
+                CRITICAL: 100,
+                HIGH: 75,
+                MODERATE: 50,
+                LOW: 25
+            };
+
+
+            regions[region].score +=
+                scoreMap[severity] || 0;
+        });
+
+
+        const regionList =
+            Object.entries(regions)
+                .map(([name, data]) => {
+
+                    return {
+                        name,
+                        count: data.count,
+                        score:
+                            data.score /
+                            data.count
+                    };
+
+                })
+                .sort(
+                    (a, b) =>
+                        b.score - a.score
+                );
+
+
+        if (!regionList.length) {
+
+            container.innerHTML =
+                '<div class="loading">No regional data available.</div>';
+
+            return;
+        }
+
+
+        container.innerHTML =
+            regionList.map(region => {
+
+                let risk = "LOW";
+
+                if (region.score >= 90) {
+                    risk = "CRITICAL";
+                }
+                else if (region.score >= 65) {
+                    risk = "HIGH";
+                }
+                else if (region.score >= 40) {
+                    risk = "MODERATE";
+                }
+
+
+                const width =
+                    Math.max(
+                        8,
+                        region.score
+                    );
+
+
+                return `
+                    <div class="region-row">
+
+                        <div class="region-head">
+
+                            <span class="region-name">
+                                ${region.name}
+                            </span>
+
+                            <span class="region-risk">
+                                ${risk}
+                                ·
+                                ${region.count} EVENTS
+                            </span>
+
+                        </div>
+
+                        <div class="region-bar">
+
+                            <div
+                                class="region-fill"
+                                style="width:${width}%"
+                            ></div>
+
+                        </div>
+
+                    </div>
+                `;
+
+            }).join("");
+    }
+
+
+    /* ==========================================
+       THERMAL CHART
+    ========================================== */
+
+    function updateThermalChart(events) {
+
+        const container =
+            document.getElementById(
+                "thermalChart"
+            );
+
+
+        const sorted =
+            [...events]
+                .sort(
+                    (a, b) =>
+                        parseNumber(b.temperature)
+                        -
+                        parseNumber(a.temperature)
+                );
+
+
+        if (!sorted.length) {
+
+            container.innerHTML =
+                '<div class="loading">No thermal data available.</div>';
+
+            return;
+        }
+
+
+        const maxTemp = Math.max(
+            ...sorted.map(
+                event =>
+                    parseNumber(
+                        event.temperature
+                    )
+            )
+        );
+
+
+        container.innerHTML =
+            sorted.map(event => {
+
+                const temp =
+                    parseNumber(
+                        event.temperature
+                    );
+
+
+                const height =
+                    Math.max(
+                        8,
+                        (temp / maxTemp) * 80
+                    );
+
+
+                return `
+                    <div class="thermal-column">
+
+                        <div class="thermal-value">
+                            ${temp.toFixed(1)}°C
+                        </div>
+
+                        <div
+                            class="thermal-bar"
+                            style="height:${height}%"
+                        ></div>
+
+                        <div class="thermal-label">
+                            ${event.id}
+                        </div>
+
+                    </div>
+                `;
+
+            }).join("");
+    }
+
+
+    /* ==========================================
+       EVENT TABLE
+    ========================================== */
+
+    function updateEventTable(events) {
+
+        const body =
+            document.getElementById(
+                "eventTableBody"
+            );
+
+
+        document.getElementById(
+            "eventCountLabel"
+        ).textContent =
+            events.length + " EVENTS LOADED";
+
+
+        if (!events.length) {
+
+            body.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="loading">
+                            No events available.
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        body.innerHTML =
+            events.map(event => {
+
+                const severity =
+                    String(
+                        event.severity || ""
+                    ).toUpperCase();
+
+
+                return `
+                    <tr>
+
+                        <td>
+                            ${event.id || "—"}
+                        </td>
+
+                        <td>
+                            ${event.type || "—"}
+                        </td>
+
+                        <td>
+                            ${event.region || "—"}
+                        </td>
+
+                        <td>
+                            ${event.temperature || "—"}
+                        </td>
+
+                        <td>
+                            ${event.confidence || "—"}
+                        </td>
+
+                        <td>
+                            <span
+                                class="severity ${severityClass(severity)}"
+                            >
+                                ${severity}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${event.status || "—"}
+                        </td>
+
+                    </tr>
+                `;
+
+            }).join("");
+    }
+
+
+    /* ==========================================
+       AI INSIGHT
+    ========================================== */
+
+    function updateInsight(events, alerts) {
+
+        const target =
+            document.getElementById(
+                "aiInsight"
+            );
+
+
+        if (!events.length) {
+
+            target.textContent =
+                "No event data is currently available for analysis.";
+
+            return;
+        }
+
+
+        const critical =
+            events.filter(
+                event =>
+                    String(event.severity)
+                        .toUpperCase()
+                    === "CRITICAL"
+            ).length;
+
+
+        const high =
+            events.filter(
+                event =>
+                    String(event.severity)
+                        .toUpperCase()
+                    === "HIGH"
+            ).length;
+
+
+        const active =
+            events.filter(
+                event =>
+                    String(event.status)
+                        .toUpperCase()
+                    === "ACTIVE"
+            ).length;
+
+
+        const temperatures =
+            events.map(
+                event =>
+                    parseNumber(
+                        event.temperature
+                    )
+            );
+
+
+        const peak =
+            Math.max(...temperatures);
+
+
+        const hottest =
+            events.find(
+                event =>
+                    parseNumber(
+                        event.temperature
+                    ) === peak
+            );
+
+
+        let message =
+            `FireGuard AI currently tracks ${events.length} detected events across monitored regions. `;
+
+
+        if (critical > 0) {
+
+            message +=
+                `${critical} critical event requires immediate attention. `;
+        }
+
+
+        if (high > 0) {
+
+            message +=
+                `${high} high-risk events remain in the monitored dataset. `;
+        }
+
+
+        if (active > 0) {
+
+            message +=
+                `${active} events are currently active. `;
+        }
+
+
+        if (hottest) {
+
+            message +=
+                `The highest recorded thermal signal is ${peak.toFixed(1)}°C at ${hottest.region}.`;
+        }
+
+
+        target.textContent = message;
+    }
+
+
+    /* ==========================================
+       MAIN
+    ========================================== */
+
+    async function loadAnalytics() {
+
+        try {
+
+            const [
+                events,
+                alerts
+            ] = await Promise.all([
+                loadEvents(),
+                loadAlerts()
+            ]);
+
+
+            updateKPIs(
+                events,
+                alerts
+            );
+
+
+            updateRiskDistribution(
+                events
+            );
+
+
+            updateEventStatus(
+                events
+            );
+
+
+            updateRegionalRisk(
+                events
+            );
+
+
+            updateThermalChart(
+                events
+            );
+
+
+            updateEventTable(
+                events
+            );
+
+
+            updateInsight(
+                events,
+                alerts
+            );
+
+
+            console.log(
+                "🔥 FireGuard AI Analytics loaded",
+                {
+                    events,
+                    alerts
+                }
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Analytics error:",
+                error
+            );
+
+
+            showError(
+                "Unable to connect to the FireGuard AI backend. Make sure app.py is running on http://127.0.0.1:5000."
+            );
+
+        }
+
+    }
+
+
+    /* ==========================================
+       START
+    ========================================== */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        loadAnalytics
+    );
+
+
+</script>
+
+</body>
+</html>

@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
        CONFIGURATION
     ===================================================== */
 
-    const API_BASE = "http://127.0.0.1:5000";
+    const API_BASE = "https://fireguardai-qsd4.onrender.com";
 
 
     /* =====================================================

@@ -1,6 +1,7 @@
 /* =========================================================
    FIREGUARD AI
    Frontend Controller
+   Repaired AI Analyst Controller
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -146,11 +147,6 @@ document.addEventListener("DOMContentLoaded", () => {
        AI ANALYST
     ===================================================== */
 
-    /*
-       We only activate this section when analyst.html
-       elements are available.
-    */
-
     const situationInput =
         document.querySelector(
             "#situation, #situationInput, textarea"
@@ -167,35 +163,25 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-    /*
-       Find the Run AI Analysis button.
-
-       Supports:
-       - #runAnalysis
-       - #run-ai-analysis
-       - .run-analysis
-       - data-action buttons
-       - arrow buttons used by the current UI
-    */
+    /* =====================================================
+       FIND ANALYSIS BUTTON
+    ===================================================== */
 
     let runButton =
         document.querySelector(
-            "#runAnalysis, #run-ai-analysis, .run-analysis, " +
+            "#runAnalysis, " +
+            "#run-ai-analysis, " +
+            ".run-analysis, " +
             "[data-action='run-analysis'], " +
             "[data-action='analyze']"
         );
 
 
     /*
-       If the HTML does not have a specific ID/class,
-       first try to find the button near the textarea.
+       Find button near the input.
     */
 
     if (!runButton && situationInput) {
-
-        /*
-           First try the closest form.
-        */
 
         const form =
             situationInput.closest("form");
@@ -218,78 +204,88 @@ document.addEventListener("DOMContentLoaded", () => {
                         return (
                             text === "→" ||
                             text === "➜" ||
+                            text === "➝" ||
+                            text === "⟶" ||
                             text.includes("run") ||
                             text.includes("analyze") ||
-                            text.includes("analysis")
+                            text.includes("analysis") ||
+                            text.includes("submit")
                         );
 
                     }) || formButtons[formButtons.length - 1];
-            }
-        }
-
-
-        /*
-           Try the nearest common analyst containers.
-        */
-
-        if (!runButton) {
-
-            const container =
-                situationInput.closest(
-                    ".analysis-input, " +
-                    ".analyst-input, " +
-                    ".input-group, " +
-                    ".analysis-form, " +
-                    ".analyst-form, " +
-                    ".analysis-query, " +
-                    ".query-form, " +
-                    ".analyst-section, " +
-                    ".analyst-panel, " +
-                    "section, " +
-                    ".container"
-                );
-
-            if (container) {
-
-                const buttons =
-                    container.querySelectorAll("button");
-
-                if (buttons.length > 0) {
-
-                    runButton =
-                        Array.from(buttons).find((button) => {
-
-                            const text =
-                                button.textContent
-                                    .trim()
-                                    .toLowerCase();
-
-                            return (
-                                text === "→" ||
-                                text === "➜" ||
-                                text === "➝" ||
-                                text === "⟶" ||
-                                text.includes("run ai analysis") ||
-                                text.includes("run analysis") ||
-                                text.includes("analyze") ||
-                                text.includes("analysis") ||
-                                text.includes("submit")
-                            );
-
-                        }) || buttons[buttons.length - 1];
-                }
             }
         }
     }
 
 
     /*
-       Final fallback.
+       Search common analyst containers.
+    */
 
-       The live FireGuard analyst interface currently
-       displays a simple white arrow button.
+    if (!runButton && situationInput) {
 
-       Search every button on the page.
+        const container =
+            situationInput.closest(
+                ".analysis-input, " +
+                ".analyst-input, " +
+                ".input-group, " +
+                ".analysis-form, " +
+                ".analyst-form, " +
+                ".analysis-query, " +
+                ".query-form, " +
+                ".query-box, " +
+                ".analyst-section, " +
+                ".analyst-panel, " +
+                "section, " +
+                ".container"
+            );
+
+        if (container) {
+
+            const containerButtons =
+                container.querySelectorAll("button");
+
+            if (containerButtons.length > 0) {
+
+                runButton =
+                    Array.from(containerButtons).find((button) => {
+
+                        const text =
+                            button.textContent
+                                .trim()
+                                .toLowerCase();
+
+                        const aria =
+                            (
+                                button.getAttribute("aria-label") ||
+                                ""
+                            )
+                                .trim()
+                                .toLowerCase();
+
+                        return (
+                            text === "→" ||
+                            text === "➜" ||
+                            text === "➝" ||
+                            text === "⟶" ||
+                            text.includes("run ai analysis") ||
+                            text.includes("run analysis") ||
+                            text.includes("analyze") ||
+                            text.includes("analysis") ||
+                            text.includes("submit") ||
+                            aria.includes("analyze") ||
+                            aria.includes("analysis") ||
+                            aria.includes("run")
+                        );
+
+                    }) || containerButtons[containerButtons.length - 1];
+            }
+        }
+    }
+
+
+    /*
+       Final button fallback.
     */
 
     if (!runButton) {
@@ -310,16 +306,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         button.getAttribute("aria-label") ||
                         ""
                     )
-                    .trim()
-                    .toLowerCase();
+                        .trim()
+                        .toLowerCase();
 
                 const title =
                     (
                         button.getAttribute("title") ||
                         ""
                     )
-                    .trim()
-                    .toLowerCase();
+                        .trim()
+                        .toLowerCase();
 
                 return (
                     text === "→" ||
@@ -344,9 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-       Last-resort fallback:
-       If there is exactly one button on the analyst
-       page and we have an input, use that button.
+       If there is exactly one button, use it.
     */
 
     if (!runButton && situationInput) {
@@ -355,9 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll("button");
 
         if (pageButtons.length === 1) {
-
-            runButton =
-                pageButtons[0];
+            runButton = pageButtons[0];
         }
     }
 
@@ -367,9 +359,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     /*
-       Locate the right-hand intelligence panel.
-       We support several possible class/id names so
-       this works with your current analyst.html.
+       IMPORTANT REPAIR:
+
+       The old code only searched for an existing result
+       element. Your analyst page does not currently have
+       one with those selectors.
+
+       We now create the result panel automatically.
     */
 
     let analysisOutput =
@@ -378,13 +374,14 @@ document.addEventListener("DOMContentLoaded", () => {
             "#analysis-result, " +
             ".analysis-output, " +
             ".analysis-result, " +
-            ".engine-panel"
+            ".engine-panel, " +
+            ".analysis-engine, " +
+            ".intelligence-engine"
         );
 
 
     /*
-       If there is no dedicated output element, look for
-       the large right-side panel.
+       Try existing analyst panel.
     */
 
     if (!analysisOutput) {
@@ -395,13 +392,102 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
         if (panels.length > 1) {
-            analysisOutput = panels[panels.length - 1];
+            analysisOutput =
+                panels[panels.length - 1];
         }
     }
 
 
+    /*
+       IMPORTANT:
+
+       If no result panel exists, create one.
+    */
+
+    if (!analysisOutput) {
+
+        analysisOutput =
+            document.createElement("div");
+
+        analysisOutput.id =
+            "analysisOutput";
+
+        analysisOutput.className =
+            "fireguard-analysis-output";
+
+        analysisOutput.style.cssText = `
+            width: 100%;
+            margin-top: 45px;
+            border: 1px solid #252525;
+            background: #070707;
+            color: #ffffff;
+            box-sizing: border-box;
+            overflow: hidden;
+        `;
+
+
+        /*
+           Put the output after the analyst query box.
+        */
+
+        const queryBox =
+            document.querySelector(".query-box");
+
+        const analystSection =
+            document.querySelector(
+                "#analyst, " +
+                ".analyst-section, " +
+                "section[id='analyst']"
+            );
+
+        if (queryBox && queryBox.parentElement) {
+
+            queryBox.parentElement.appendChild(
+                analysisOutput
+            );
+
+        } else if (analystSection) {
+
+            analystSection.appendChild(
+                analysisOutput
+            );
+
+        } else if (situationInput) {
+
+            const parent =
+                situationInput.closest(
+                    "section, main, body"
+                );
+
+            if (parent) {
+                parent.appendChild(
+                    analysisOutput
+                );
+            }
+
+        } else {
+
+            document.body.appendChild(
+                analysisOutput
+            );
+        }
+    }
+
+
+    /*
+       Make sure the output is visible.
+    */
+
+    if (analysisOutput) {
+
+        analysisOutput.style.display = "block";
+        analysisOutput.style.width = "100%";
+        analysisOutput.style.boxSizing = "border-box";
+    }
+
+
     /* =====================================================
-       FIND QUICK ANALYSIS BUTTONS
+       QUICK ANALYSIS BUTTONS
     ===================================================== */
 
     const quickButtons =
@@ -414,7 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       ANALYSIS DATA
+       FORM DATA
     ===================================================== */
 
     const getFormData = () => {
@@ -470,7 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     border-radius:50%;
                     animation:fireguardSpin 1s linear infinite;
                     margin-bottom:25px;
-                 "></div>
+                "></div>
 
                 <div style="
                     font-size:18px;
@@ -478,14 +564,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     text-transform:uppercase;
                     color:#ffffff;
                     margin-bottom:12px;
-                 ">
+                ">
                     FireGuard Intelligence Engine
                 </div>
 
                 <div style="
                     color:#777;
                     font-size:14px;
-                 ">
+                ">
                     Analyzing thermal and regional signals...
                 </div>
 
@@ -493,6 +579,19 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         addSpinnerAnimation();
+
+        /*
+           Scroll gently to result panel.
+        */
+
+        setTimeout(() => {
+
+            analysisOutput.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+        }, 100);
     };
 
 
@@ -502,7 +601,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const addSpinnerAnimation = () => {
 
-        if (document.getElementById("fireguard-spinner-style")) {
+        if (
+            document.getElementById(
+                "fireguard-spinner-style"
+            )
+        ) {
             return;
         }
 
@@ -522,6 +625,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     transform: rotate(360deg);
                 }
             }
+
+            .fireguard-analysis-output {
+                animation: fireguardResultIn .35s ease;
+            }
+
+            @keyframes fireguardResultIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
         `;
 
         document.head.appendChild(style);
@@ -534,7 +653,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const escapeHTML = (value) => {
 
-        if (value === null || value === undefined) {
+        if (
+            value === null ||
+            value === undefined
+        ) {
             return "";
         }
 
@@ -554,7 +676,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const getRiskColor = (level) => {
 
         const value =
-            String(level || "").toUpperCase();
+            String(level || "")
+                .toUpperCase();
 
         if (value === "CRITICAL") {
             return "#ff3828";
@@ -582,63 +705,103 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const displayAnalysis = (data) => {
 
+        /*
+           Safety fallback.
+
+           Even if something removes the panel later,
+           recreate it instead of failing silently.
+        */
+
         if (!analysisOutput) {
 
-            console.error(
-                "FireGuard: analysis output panel not found."
+            console.warn(
+                "FireGuard: output panel missing. Creating one."
             );
 
-            return;
+            analysisOutput =
+                document.createElement("div");
+
+            analysisOutput.id =
+                "analysisOutput";
+
+            analysisOutput.style.cssText = `
+                width:100%;
+                margin-top:45px;
+                background:#070707;
+                border:1px solid #252525;
+                color:#fff;
+                box-sizing:border-box;
+            `;
+
+            const analystSection =
+                document.querySelector(
+                    "#analyst, " +
+                    ".analyst-section, " +
+                    "section[id='analyst']"
+                );
+
+            if (analystSection) {
+                analystSection.appendChild(
+                    analysisOutput
+                );
+            } else {
+                document.body.appendChild(
+                    analysisOutput
+                );
+            }
         }
 
 
         const threat =
             data.threat_level ||
             data.threat ||
+            data.risk_level ||
             "UNKNOWN";
 
 
         const score =
             data.score ??
             data.risk_score ??
+            data.riskScore ??
             0;
 
 
         const thermal =
             data.thermal_signal ||
             data.temperature ||
+            data.thermal ||
             "N/A";
 
 
         const industrial =
             data.industrial_proximity ||
             data.industrial_risk ||
+            data.industrial ||
             "N/A";
 
 
         const population =
             data.population_exposure ||
             data.population_risk ||
+            data.population ||
             "N/A";
 
 
         const confidence =
             data.ai_confidence ||
             data.confidence ||
+            data.aiConfidence ||
             "N/A";
 
 
         let explanation =
             data.explanation ||
+            data.summary ||
+            data.reasoning ||
             "No explanation was returned by the intelligence engine.";
 
 
-        /*
-           Flask may return explanation as an array.
-        */
-
         if (Array.isArray(explanation)) {
-
             explanation =
                 explanation.join(" ");
         }
@@ -647,11 +810,12 @@ document.addEventListener("DOMContentLoaded", () => {
         let recommendations =
             data.recommended_response ||
             data.recommendations ||
+            data.recommended_actions ||
+            data.actions ||
             [];
 
 
         if (!Array.isArray(recommendations)) {
-
             recommendations =
                 [recommendations];
         }
@@ -671,6 +835,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             ${escapeHTML(item)}
                         </li>
                     `;
+
                 })
                 .join("");
 
@@ -718,7 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
                     <span style="
-                        color:#888;
+                        color:#20e875;
                         font-size:12px;
                         text-transform:uppercase;
                     ">
@@ -738,6 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     display:flex;
                     justify-content:space-between;
                     align-items:center;
+                    gap:20px;
                 ">
 
                     <div>
@@ -768,6 +934,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         color:#f5f5f5;
                     ">
                         ${escapeHTML(score)}
+
                         <span style="
                             font-size:14px;
                             color:#777;
@@ -775,6 +942,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         ">
                             /100
                         </span>
+
                     </div>
 
                 </div>
@@ -1007,13 +1175,30 @@ document.addEventListener("DOMContentLoaded", () => {
                         line-height:2;
                         font-size:14px;
                     ">
-                        ${recommendationHTML}
+                        ${
+                            recommendationHTML ||
+                            "<li>No specific recommendations returned.</li>"
+                        }
                     </ul>
 
                 </div>
 
             </div>
         `;
+
+
+        /*
+           Scroll result into view.
+        */
+
+        setTimeout(() => {
+
+            analysisOutput.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+        }, 100);
     };
 
 
@@ -1056,6 +1241,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
                 <button
+                    type="button"
                     onclick="location.reload()"
                     style="
                         background:#ff3828;
@@ -1201,23 +1387,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-               Some Flask APIs return:
+               Support all common response formats:
 
                {
-                   "result": {
-                       ...
-                   }
+                   "result": {...}
                }
 
-               Others return the analysis directly.
+               {
+                   "analysis": {...}
+               }
 
-               Support both.
+               {
+                   "status": "success",
+                   ...
+               }
             */
 
-            const result =
+            let result =
                 data.result ||
                 data.analysis ||
+                data.data ||
                 data;
+
+
+            /*
+               Some APIs return analysis nested again.
+            */
+
+            if (
+                result &&
+                typeof result === "object" &&
+                result.analysis &&
+                typeof result.analysis === "object"
+            ) {
+                result = result.analysis;
+            }
+
+
+            console.log(
+                "🔥 FireGuard analysis result:",
+                result
+            );
 
 
             displayAnalysis(result);
@@ -1266,6 +1476,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         );
 
+
         console.log(
             "🔥 FireGuard AI Analyst button connected."
         );
@@ -1299,11 +1510,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-
-            /*
-               Match the quick-analysis buttons
-               from your current analyst interface.
-            */
 
             const lower =
                 text.toLowerCase();
@@ -1339,11 +1545,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Recommend an emergency response strategy for a high-risk thermal event.";
             }
 
-
-            /*
-               Automatically change the analysis mode
-               when possible.
-            */
 
             if (modeInput) {
 
@@ -1396,14 +1597,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const options =
             Array.from(select.options || []);
 
+
         const match =
             options.find((option) =>
                 option.text
                     .trim()
                     .toLowerCase()
                     .includes(
-                        desiredText
-                            .toLowerCase()
+                        desiredText.toLowerCase()
                     )
             );
 
@@ -1415,21 +1616,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } else {
 
-            /*
-               Fallback: select by partial value.
-            */
-
             const valueMatch =
                 options.find((option) =>
                     String(option.value)
                         .toLowerCase()
                         .includes(
-                            desiredText
-                                .toLowerCase()
+                            desiredText.toLowerCase()
                         )
                 );
 
+
             if (valueMatch) {
+
                 select.value =
                     valueMatch.value;
             }
@@ -1487,6 +1685,13 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(
             "Analysis button:",
             runButton
+                ? "CONNECTED"
+                : "NOT FOUND"
+        );
+
+        console.log(
+            "Analysis output:",
+            analysisOutput
                 ? "CONNECTED"
                 : "NOT FOUND"
         );

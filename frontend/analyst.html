@@ -8,10 +8,15 @@
     <title>FireGuard AI — AI Analyst</title>
 
     <style>
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -26,9 +31,16 @@
             text-decoration: none;
         }
 
-        /* =========================
+        button,
+        input,
+        textarea,
+        select {
+            font-family: inherit;
+        }
+
+        /* =====================================================
            NAVIGATION
-        ========================= */
+        ===================================================== */
 
         .navbar {
             min-height: 96px;
@@ -38,8 +50,9 @@
             padding: 0 5%;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
             background: rgba(5, 5, 5, 0.97);
+            backdrop-filter: blur(12px);
         }
 
         .brand {
@@ -47,16 +60,19 @@
             align-items: center;
             gap: 16px;
             margin-right: 70px;
+            flex-shrink: 0;
         }
 
         .brand-fire {
             font-size: 38px;
+            line-height: 1;
         }
 
         .brand-name {
             font-size: 30px;
             font-weight: 800;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
         .brand-name span {
@@ -66,15 +82,17 @@
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 32px;
+            gap: 30px;
             flex: 1;
+            min-width: 0;
         }
 
         .nav-links a {
             color: #777;
-            font-size: 14px;
+            font-size: 13px;
             letter-spacing: 1.5px;
-            transition: 0.2s;
+            transition: 0.2s ease;
+            white-space: nowrap;
         }
 
         .nav-links a:hover,
@@ -85,52 +103,53 @@
         .system-status {
             border: 1px solid #292929;
             border-radius: 30px;
-            padding: 14px 24px;
+            padding: 13px 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 13px;
+            gap: 10px;
+            font-size: 12px;
             letter-spacing: 1.5px;
             white-space: nowrap;
+            margin-left: 25px;
         }
 
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 9px;
+            height: 9px;
             background: #16e47a;
             border-radius: 50%;
             box-shadow: 0 0 12px #16e47a;
         }
 
-        /* =========================
+        /* =====================================================
            HERO
-        ========================= */
+        ===================================================== */
 
         .hero {
-            min-height: 380px;
-            padding: 90px 5% 70px;
+            min-height: 390px;
+            padding: 90px 5% 75px;
             border-bottom: 1px solid #222;
             background:
                 radial-gradient(
-                    circle at 75% 30%,
-                    rgba(100, 10, 10, 0.18),
+                    circle at 78% 25%,
+                    rgba(120, 10, 10, 0.20),
                     transparent 45%
                 );
         }
 
         .eyebrow {
             color: #ff9d00;
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 12px;
+            font-weight: 700;
             letter-spacing: 6px;
-            margin-bottom: 38px;
+            margin-bottom: 35px;
         }
 
         .hero h1 {
             font-size: clamp(55px, 7vw, 100px);
             line-height: 0.95;
             font-weight: 900;
-            max-width: 900px;
+            max-width: 1000px;
             letter-spacing: -4px;
         }
 
@@ -139,27 +158,28 @@
         }
 
         .hero p {
-            margin-top: 35px;
+            margin-top: 34px;
             max-width: 1000px;
             color: #8190a5;
-            font-size: 18px;
+            font-size: 17px;
             line-height: 1.8;
         }
 
-        /* =========================
+        /* =====================================================
            MAIN
-        ========================= */
+        ===================================================== */
 
         .main {
             width: 90%;
-            max-width: 1500px;
+            max-width: 1550px;
             margin: 50px auto 100px;
         }
 
         .workspace {
             display: grid;
-            grid-template-columns: 1fr 1.45fr;
+            grid-template-columns: minmax(340px, 0.85fr) minmax(500px, 1.35fr);
             gap: 30px;
+            align-items: start;
         }
 
         .panel {
@@ -167,9 +187,9 @@
             background: #070707;
         }
 
-        /* =========================
-           LEFT PANEL
-        ========================= */
+        /* =====================================================
+           REQUEST PANEL
+        ===================================================== */
 
         .request-panel {
             padding: 34px;
@@ -177,9 +197,10 @@
 
         .section-label {
             color: #8491a5;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 5px;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
+            font-weight: 700;
         }
 
         .field {
@@ -189,7 +210,7 @@
         .field label {
             display: block;
             color: #aab1bd;
-            font-size: 13px;
+            font-size: 12px;
             letter-spacing: 1.5px;
             margin-bottom: 12px;
         }
@@ -204,16 +225,22 @@
             font-size: 15px;
             outline: none;
             font-family: Arial, Helvetica, sans-serif;
+            transition: border-color 0.2s ease;
         }
 
         textarea {
             min-height: 190px;
             resize: vertical;
-            line-height: 1.6;
+            line-height: 1.65;
             display: block;
             cursor: text;
             pointer-events: auto;
             user-select: text;
+            -webkit-user-select: text;
+        }
+
+        textarea::placeholder {
+            color: #555;
         }
 
         textarea:focus,
@@ -232,14 +259,21 @@
             color: #fff;
             padding: 19px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             letter-spacing: 2px;
-            font-weight: bold;
-            transition: 0.25s;
+            font-weight: 700;
+            transition:
+                background 0.25s ease,
+                transform 0.15s ease,
+                opacity 0.2s ease;
         }
 
         .run-button:hover {
             background: #ff3b30;
+        }
+
+        .run-button:active {
+            transform: scale(0.99);
         }
 
         .run-button:disabled {
@@ -259,23 +293,28 @@
         }
 
         .quick-button {
+            width: 100%;
             text-align: left;
             padding: 15px;
             border: 1px solid #252525;
             background: #090909;
             color: #9da8b8;
             cursor: pointer;
-            transition: 0.2s;
+            transition:
+                border-color 0.2s ease,
+                color 0.2s ease,
+                background 0.2s ease;
         }
 
         .quick-button:hover {
             border-color: #555;
             color: white;
+            background: #0e0e0e;
         }
 
-        /* =========================
-           RIGHT PANEL
-        ========================= */
+        /* =====================================================
+           RESULT PANEL
+        ===================================================== */
 
         .result-panel {
             padding: 34px;
@@ -296,27 +335,29 @@
             align-items: center;
             gap: 14px;
             color: #b8c0cc;
-            font-size: 15px;
+            font-size: 14px;
             letter-spacing: 2px;
         }
 
         .engine-dot {
-            width: 16px;
-            height: 16px;
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
             background: #ff3b30;
             box-shadow: 0 0 20px rgba(255, 59, 48, 0.8);
+            flex-shrink: 0;
         }
 
         .engine-status {
             color: #788394;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* =========================
+        /* =====================================================
            ERROR
-        ========================= */
+        ===================================================== */
 
         .error-box {
             display: none;
@@ -326,15 +367,16 @@
             color: #ff7770;
             margin-bottom: 20px;
             line-height: 1.6;
+            font-size: 14px;
         }
 
         .error-box.show {
             display: block;
         }
 
-        /* =========================
+        /* =====================================================
            EMPTY STATE
-        ========================= */
+        ===================================================== */
 
         .empty-state {
             min-height: 540px;
@@ -344,6 +386,7 @@
             justify-content: center;
             text-align: center;
             color: #687386;
+            padding: 40px;
         }
 
         .empty-icon {
@@ -375,9 +418,9 @@
             color: #555f70;
         }
 
-        /* =========================
+        /* =====================================================
            RESULT
-        ========================= */
+        ===================================================== */
 
         .result-content {
             display: none;
@@ -435,6 +478,7 @@
             border: 1px solid #252525;
             padding: 25px;
             min-height: 140px;
+            background: #090909;
         }
 
         .metric-label {
@@ -448,6 +492,7 @@
             color: white;
             font-size: 25px;
             font-weight: bold;
+            word-break: break-word;
         }
 
         .metric-description {
@@ -461,6 +506,7 @@
             border: 1px solid #292929;
             padding: 27px;
             margin-bottom: 20px;
+            background: #090909;
         }
 
         .info-title {
@@ -468,6 +514,7 @@
             font-size: 12px;
             letter-spacing: 4px;
             margin-bottom: 18px;
+            font-weight: 700;
         }
 
         .info-text {
@@ -475,6 +522,7 @@
             line-height: 1.8;
             font-size: 15px;
             white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .response-box {
@@ -483,29 +531,79 @@
             padding: 27px;
         }
 
-        /* =========================
-           RESPONSIVE
-        ========================= */
+        /* =====================================================
+           LOADING
+        ===================================================== */
 
-        @media (max-width: 1100px) {
+        .analysis-loading {
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 69, 45, 0.2);
+            border-top-color: #ff452d;
+            border-radius: 50%;
+            animation: fireguardSpin 1s linear infinite;
+            margin-bottom: 25px;
+        }
+
+        @keyframes fireguardSpin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-title {
+            font-size: 17px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .loading-text {
+            color: #777;
+            font-size: 13px;
+        }
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 1200px) {
 
             .navbar {
                 padding: 20px 25px;
                 flex-wrap: wrap;
-                gap: 20px;
+                gap: 18px;
             }
 
             .brand {
-                margin-right: 30px;
+                margin-right: 25px;
             }
 
             .nav-links {
                 gap: 18px;
                 overflow-x: auto;
+                order: 3;
+                width: 100%;
+                padding-bottom: 3px;
             }
 
-            .nav-links a {
-                font-size: 12px;
+            .system-status {
+                margin-left: auto;
             }
 
             .workspace {
@@ -519,17 +617,21 @@
                 height: auto;
             }
 
-            .brand {
-                margin-right: 0;
+            .brand-name {
+                font-size: 24px;
             }
 
-            .nav-links {
-                order: 3;
-                width: 100%;
+            .brand-fire {
+                font-size: 30px;
+            }
+
+            .nav-links a {
+                font-size: 11px;
             }
 
             .system-status {
-                margin-left: auto;
+                padding: 10px 14px;
+                font-size: 10px;
             }
 
             .hero {
@@ -538,10 +640,16 @@
 
             .hero h1 {
                 font-size: 55px;
+                letter-spacing: -3px;
+            }
+
+            .hero p {
+                font-size: 15px;
             }
 
             .main {
                 width: calc(100% - 30px);
+                margin-top: 30px;
             }
 
             .request-panel,
@@ -557,47 +665,90 @@
                 align-items: flex-start;
                 flex-direction: column;
             }
+
+            .threat-level {
+                font-size: 34px;
+            }
+
+            .engine-header {
+                align-items: flex-start;
+                gap: 15px;
+                flex-direction: column;
+            }
         }
+
     </style>
+
 </head>
 
 <body>
 
-    <!-- =========================
+    <!-- =====================================================
          NAVIGATION
-    ========================= -->
+    ===================================================== -->
 
     <header class="navbar">
 
         <a href="index.html" class="brand">
-            <div class="brand-fire">🔥</div>
+
+            <div class="brand-fire">
+                🔥
+            </div>
 
             <div class="brand-name">
                 FIREGUARD <span>AI</span>
             </div>
+
         </a>
 
+
         <nav class="nav-links">
-            <a href="index.html">COMMAND</a>
-            <a href="map.html">LIVE MAP</a>
-            <a href="events.html">EVENTS</a>
-            <a href="analyst.html" class="active">AI ANALYST</a>
-            <a href="analytics.html">ANALYTICS</a>
-            <a href="alerts.html">ALERTS</a>
-            <a href="reports.html">REPORTS</a>
+
+            <a href="index.html">
+                COMMAND
+            </a>
+
+            <a href="map.html">
+                LIVE MAP
+            </a>
+
+            <a href="events.html">
+                EVENTS
+            </a>
+
+            <a href="analyst.html" class="active">
+                AI ANALYST
+            </a>
+
+            <a href="analytics.html">
+                ANALYTICS
+            </a>
+
+            <a href="alerts.html">
+                ALERTS
+            </a>
+
+            <a href="reports.html">
+                REPORTS
+            </a>
+
         </nav>
 
+
         <div class="system-status">
+
             <span class="status-dot"></span>
+
             SYSTEM ONLINE
+
         </div>
 
     </header>
 
 
-    <!-- =========================
+    <!-- =====================================================
          HERO
-    ========================= -->
+    ===================================================== -->
 
     <section class="hero">
 
@@ -619,23 +770,27 @@
     </section>
 
 
-    <!-- =========================
-         MAIN
-    ========================= -->
+    <!-- =====================================================
+         MAIN WORKSPACE
+    ===================================================== -->
 
     <main class="main">
 
         <div class="workspace">
 
-            <!-- =========================
+
+            <!-- =================================================
                  REQUEST PANEL
-            ========================== -->
+            ================================================= -->
 
             <section class="panel request-panel">
 
                 <div class="section-label">
                     ANALYSIS REQUEST
                 </div>
+
+
+                <!-- SITUATION -->
 
                 <div class="field">
 
@@ -654,13 +809,18 @@
                 </div>
 
 
+                <!-- REGION -->
+
                 <div class="field">
 
                     <label for="region">
                         REGION
                     </label>
 
-                    <select id="region">
+                    <select
+                        id="region"
+                        name="region"
+                    >
 
                         <option value="Chennai">
                             Chennai
@@ -687,13 +847,18 @@
                 </div>
 
 
+                <!-- MODE -->
+
                 <div class="field">
 
                     <label for="mode">
                         ANALYSIS MODE
                     </label>
 
-                    <select id="mode">
+                    <select
+                        id="mode"
+                        name="mode"
+                    >
 
                         <option value="thermal">
                             Thermal Anomaly Analysis
@@ -716,6 +881,8 @@
                 </div>
 
 
+                <!-- RUN BUTTON -->
+
                 <button
                     type="button"
                     class="run-button"
@@ -724,6 +891,8 @@
                     RUN AI ANALYSIS →
                 </button>
 
+
+                <!-- QUICK ANALYSIS -->
 
                 <div class="section-label quick-title">
                     QUICK ANALYSIS
@@ -740,6 +909,7 @@
                         🔥 Analyze a critical thermal anomaly
                     </button>
 
+
                     <button
                         type="button"
                         class="quick-button"
@@ -748,6 +918,7 @@
                         🏭 Assess industrial fire risk
                     </button>
 
+
                     <button
                         type="button"
                         class="quick-button"
@@ -755,6 +926,7 @@
                     >
                         👥 Estimate population exposure
                     </button>
+
 
                     <button
                         type="button"
@@ -769,9 +941,9 @@
             </section>
 
 
-            <!-- =========================
+            <!-- =================================================
                  RESULT PANEL
-            ========================== -->
+            ================================================= -->
 
             <section class="panel result-panel">
 
@@ -785,6 +957,7 @@
 
                     </div>
 
+
                     <div
                         class="engine-status"
                         id="engineStatus"
@@ -794,6 +967,8 @@
 
                 </div>
 
+
+                <!-- ERROR -->
 
                 <div
                     class="error-box"
@@ -846,6 +1021,7 @@
                             >
                                 UNKNOWN
                             </div>
+
 
                             <div class="score">
 
@@ -970,7 +1146,7 @@
                     </div>
 
 
-                    <!-- RESPONSE -->
+                    <!-- RECOMMENDED RESPONSE -->
 
                     <div class="response-box">
 
@@ -996,29 +1172,35 @@
     </main>
 
 
-    <!-- =========================
-         JAVASCRIPT
-    ========================= -->
+    <!-- =====================================================
+         FIREGUARD ANALYST JAVASCRIPT
+    ===================================================== -->
 
     <script>
 
         /*
-         * FireGuard AI Analyst
-         */
-
-        /*
+         * =====================================================
+         * FIREGUARD AI BACKEND
+         * =====================================================
+         *
          * IMPORTANT:
+         * This is the deployed Render backend.
          *
-         * This must point to your deployed backend.
+         * DO NOT use:
          *
-         * If your Flask backend is deployed at a different
-         * Render URL, replace the URL below.
+         * http://127.0.0.1:5000
+         *
+         * on the deployed website.
          */
-        const API_BASE = "http://127.0.0.1:5000";
+
+        const API_BASE =
+            "https://fireguardai-qsd4.onrender.com";
 
 
         /*
-         * Quick analysis requests
+         * =====================================================
+         * QUICK ANALYSIS REQUESTS
+         * =====================================================
          */
 
         const quickRequests = {
@@ -1039,73 +1221,121 @@
 
 
         /*
-         * Get elements
+         * =====================================================
+         * DOM ELEMENTS
+         * =====================================================
          */
 
         const situationInput =
             document.getElementById("situation");
 
+
         const regionInput =
             document.getElementById("region");
+
 
         const modeInput =
             document.getElementById("mode");
 
+
         const runButton =
             document.getElementById("runButton");
 
+
         const engineStatus =
             document.getElementById("engineStatus");
+
 
         const errorBox =
             document.getElementById("errorBox");
 
 
         /*
-         * Quick analysis
+         * =====================================================
+         * QUICK ANALYSIS
+         * =====================================================
          */
 
         function quickAnalysis(mode) {
 
-            modeInput.value = mode;
+            if (!situationInput) {
+                return;
+            }
 
-            situationInput.value =
-                quickRequests[mode];
+
+            if (
+                quickRequests[mode]
+            ) {
+
+                situationInput.value =
+                    quickRequests[mode];
+
+            }
+
+
+            if (modeInput) {
+
+                modeInput.value =
+                    mode;
+
+            }
+
 
             situationInput.focus();
 
             runAnalysis();
+
         }
 
 
         /*
-         * Safely get a value.
+         * =====================================================
+         * SAFE VALUE READER
+         * =====================================================
          */
 
-        function getValue(object, names, fallback = null) {
+        function getValue(
+            object,
+            names,
+            fallback = null
+        ) {
 
-            if (!object || typeof object !== "object") {
+            if (
+                !object ||
+                typeof object !== "object"
+            ) {
+
                 return fallback;
+
             }
 
-            for (const name of names) {
+
+            for (
+                const name of names
+            ) {
 
                 if (
                     object[name] !== undefined &&
                     object[name] !== null &&
                     object[name] !== ""
                 ) {
+
                     return object[name];
+
                 }
 
             }
 
+
             return fallback;
+
         }
 
 
         /*
-         * Convert value to readable text.
+         * =====================================================
+         * READABLE VALUE
+         * =====================================================
          */
 
         function readable(value) {
@@ -1115,122 +1345,201 @@
                 value === undefined ||
                 value === ""
             ) {
+
                 return "--";
+
             }
 
-            if (typeof value === "object") {
+
+            if (
+                typeof value === "object"
+            ) {
 
                 try {
-                    return JSON.stringify(value, null, 2);
-                } catch {
+
+                    return JSON.stringify(
+                        value,
+                        null,
+                        2
+                    );
+
+                } catch (error) {
+
                     return String(value);
+
                 }
 
             }
 
+
             return String(value);
+
         }
 
 
         /*
-         * Determine threat level.
+         * =====================================================
+         * DETERMINE THREAT
+         * =====================================================
          */
 
-        function determineThreat(analysis) {
+        function determineThreat(
+            analysis
+        ) {
 
-            const level = getValue(
-                analysis,
-                [
-                    "threat_level",
-                    "threatLevel",
-                    "severity",
-                    "risk_level",
-                    "riskLevel",
-                    "level"
-                ]
-            );
+            const level =
+                getValue(
+                    analysis,
+                    [
+                        "threat_level",
+                        "threatLevel",
+                        "severity",
+                        "risk_level",
+                        "riskLevel",
+                        "level"
+                    ]
+                );
+
 
             if (level) {
 
                 const text =
-                    String(level).toUpperCase();
+                    String(level)
+                        .toUpperCase();
 
-                if (text.includes("CRITICAL")) {
+
+                if (
+                    text.includes("CRITICAL")
+                ) {
+
                     return "CRITICAL";
+
                 }
 
-                if (text.includes("HIGH")) {
+
+                if (
+                    text.includes("HIGH")
+                ) {
+
                     return "HIGH";
+
                 }
 
-                if (text.includes("MEDIUM")) {
+
+                if (
+                    text.includes("MODERATE")
+                ) {
+
+                    return "MODERATE";
+
+                }
+
+
+                if (
+                    text.includes("MEDIUM")
+                ) {
+
                     return "MEDIUM";
+
                 }
 
-                if (text.includes("LOW")) {
+
+                if (
+                    text.includes("LOW")
+                ) {
+
                     return "LOW";
+
                 }
+
 
                 return text;
+
             }
 
 
-            const score = Number(
-                getValue(
-                    analysis,
-                    [
-                        "threat_score",
-                        "threatScore",
-                        "risk_score",
-                        "riskScore",
-                        "score"
-                    ],
-                    0
-                )
-            );
+            const score =
+                Number(
+                    getValue(
+                        analysis,
+                        [
+                            "threat_score",
+                            "threatScore",
+                            "risk_score",
+                            "riskScore",
+                            "score"
+                        ],
+                        0
+                    )
+                );
 
 
-            if (score >= 80) {
+            if (
+                score >= 80
+            ) {
+
                 return "CRITICAL";
+
             }
 
-            if (score >= 60) {
+
+            if (
+                score >= 60
+            ) {
+
                 return "HIGH";
+
             }
 
-            if (score >= 35) {
-                return "MEDIUM";
+
+            if (
+                score >= 35
+            ) {
+
+                return "MODERATE";
+
             }
 
-            if (score > 0) {
+
+            if (
+                score > 0
+            ) {
+
                 return "LOW";
+
             }
+
 
             return "UNKNOWN";
+
         }
 
 
         /*
-         * Display analysis.
+         * =====================================================
+         * DISPLAY ANALYSIS
+         * =====================================================
          */
 
-        function displayAnalysis(data) {
+        function displayAnalysis(
+            data
+        ) {
 
             console.log(
-                "Displaying FireGuard analysis:",
+                "FireGuard AI response:",
                 data
             );
 
 
             /*
-             * Backend response can be:
+             * Backend may return:
              *
              * {
              *     status: "success",
-             *     analysis: {
-             *         ...
-             *     }
+             *     analysis: {...}
              * }
+             *
+             * OR the analysis directly.
              */
 
             const analysis =
@@ -1241,7 +1550,10 @@
                     : data;
 
 
-            if (!analysis || typeof analysis !== "object") {
+            if (
+                !analysis ||
+                typeof analysis !== "object"
+            ) {
 
                 throw new Error(
                     "Invalid analysis data received from backend."
@@ -1251,11 +1563,14 @@
 
 
             /*
-             * THREAT LEVEL
+             * THREAT
              */
 
             const threat =
-                determineThreat(analysis);
+                determineThreat(
+                    analysis
+                );
+
 
             document.getElementById(
                 "threatLevel"
@@ -1264,19 +1579,21 @@
 
 
             /*
-             * THREAT SCORE
+             * SCORE
              */
 
-            const score = getValue(
-                analysis,
-                [
-                    "threat_score",
-                    "threatScore",
-                    "risk_score",
-                    "riskScore",
-                    "score"
-                ]
-            );
+            const score =
+                getValue(
+                    analysis,
+                    [
+                        "threat_score",
+                        "threatScore",
+                        "risk_score",
+                        "riskScore",
+                        "score"
+                    ]
+                );
+
 
             document.getElementById(
                 "riskScore"
@@ -1287,132 +1604,156 @@
 
 
             /*
-             * TEMPERATURE
+             * THERMAL
              */
 
-            const temperature = getValue(
-                analysis,
-                [
-                    "temperature",
-                    "thermal_signal",
-                    "thermalSignal",
-                    "temp",
-                    "temperature_value"
-                ]
-            );
+            const temperature =
+                getValue(
+                    analysis,
+                    [
+                        "temperature",
+                        "thermal_signal",
+                        "thermalSignal",
+                        "temp",
+                        "temperature_value"
+                    ]
+                );
+
 
             document.getElementById(
                 "thermalValue"
             ).textContent =
-                readable(temperature);
+                readable(
+                    temperature
+                );
 
 
             /*
-             * INDUSTRIAL PROXIMITY
+             * INDUSTRIAL
              */
 
-            const industrial = getValue(
-                analysis,
-                [
-                    "industrial_proximity",
-                    "industrialProximity",
-                    "industrial_risk",
-                    "industrialRisk",
-                    "industrial"
-                ]
-            );
+            const industrial =
+                getValue(
+                    analysis,
+                    [
+                        "industrial_proximity",
+                        "industrialProximity",
+                        "industrial_risk",
+                        "industrialRisk",
+                        "industrial"
+                    ]
+                );
+
 
             document.getElementById(
                 "industrialValue"
             ).textContent =
-                readable(industrial);
+                readable(
+                    industrial
+                );
 
 
             /*
-             * POPULATION EXPOSURE
+             * POPULATION
              */
 
-            const population = getValue(
-                analysis,
-                [
-                    "population_exposure",
-                    "populationExposure",
-                    "population_risk",
-                    "populationRisk",
-                    "population"
-                ]
-            );
+            const population =
+                getValue(
+                    analysis,
+                    [
+                        "population_exposure",
+                        "populationExposure",
+                        "population_risk",
+                        "populationRisk",
+                        "population"
+                    ]
+                );
+
 
             document.getElementById(
                 "populationValue"
             ).textContent =
-                readable(population);
+                readable(
+                    population
+                );
 
 
             /*
-             * AI CONFIDENCE
+             * CONFIDENCE
              */
 
-            const confidence = getValue(
-                analysis,
-                [
-                    "ai_confidence",
-                    "confidence",
-                    "aiConfidence",
-                    "confidence_value"
-                ]
-            );
+            const confidence =
+                getValue(
+                    analysis,
+                    [
+                        "ai_confidence",
+                        "confidence",
+                        "aiConfidence",
+                        "confidence_value"
+                    ]
+                );
+
 
             document.getElementById(
                 "confidenceValue"
             ).textContent =
-                readable(confidence);
+                readable(
+                    confidence
+                );
 
 
             /*
              * EXPLANATION
              */
 
-            const explanation = getValue(
-                analysis,
-                [
-                    "explanation",
-                    "assessment",
-                    "reasoning",
-                    "summary",
-                    "description"
-                ],
-                "No explanation available."
-            );
+            const explanation =
+                getValue(
+                    analysis,
+                    [
+                        "explanation",
+                        "assessment",
+                        "reasoning",
+                        "summary",
+                        "description"
+                    ],
+                    "No explanation available."
+                );
+
 
             document.getElementById(
                 "explanation"
             ).textContent =
-                readable(explanation);
+                readable(
+                    explanation
+                );
 
 
             /*
              * RECOMMENDED RESPONSE
              */
 
-            const recommendation = getValue(
-                analysis,
-                [
-                    "recommended_response",
-                    "recommendedResponse",
-                    "recommendation",
-                    "recommended_action",
-                    "recommendedAction",
-                    "response",
-                    "action"
-                ],
-                "No response recommendation available."
-            );
+            const recommendation =
+                getValue(
+                    analysis,
+                    [
+                        "recommended_response",
+                        "recommendedResponse",
+                        "recommendation",
+                        "recommended_action",
+                        "recommendedAction",
+                        "response",
+                        "action"
+                    ],
+                    "No response recommendation available."
+                );
+
 
             document.getElementById(
                 "recommendedResponse"
             ).textContent =
-                readable(recommendation);
+                readable(
+                    recommendation
+                );
 
 
             /*
@@ -1421,17 +1762,18 @@
 
             document.getElementById(
                 "emptyState"
-            ).style.display = "none";
+            ).style.display =
+                "none";
 
 
             document.getElementById(
                 "resultContent"
-            ).classList.add("show");
+            ).classList.add(
+                "show"
+            );
 
 
-            document.getElementById(
-                "engineStatus"
-            ).textContent =
+            engineStatus.textContent =
                 "ANALYSIS COMPLETE";
 
 
@@ -1450,112 +1792,414 @@
 
 
         /*
+         * =====================================================
+         * SHOW LOADING
+         * =====================================================
+         */
+
+        function showLoading() {
+
+            const resultContent =
+                document.getElementById(
+                    "resultContent"
+                );
+
+
+            const emptyState =
+                document.getElementById(
+                    "emptyState"
+                );
+
+
+            emptyState.style.display =
+                "none";
+
+
+            resultContent.classList.add(
+                "show"
+            );
+
+
+            resultContent.innerHTML = `
+
+                <div class="analysis-loading">
+
+                    <div class="loading-spinner"></div>
+
+                    <div class="loading-title">
+                        FireGuard Intelligence Engine
+                    </div>
+
+                    <div class="loading-text">
+                        Analyzing thermal and regional signals...
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /*
+         * =====================================================
+         * RESTORE RESULT PANEL
+         * =====================================================
+         */
+
+        function restoreResultPanel() {
+
+            const resultContent =
+                document.getElementById(
+                    "resultContent"
+                );
+
+
+            resultContent.innerHTML = `
+
+                <div class="threat-box">
+
+                    <div class="threat-label">
+                        AI ASSESSED THREAT LEVEL
+                    </div>
+
+                    <div class="threat-row">
+
+                        <div
+                            class="threat-level"
+                            id="threatLevel"
+                        >
+                            UNKNOWN
+                        </div>
+
+                        <div class="score">
+
+                            <strong id="riskScore">
+                                --
+                            </strong>
+
+                            /100
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metrics">
+
+                    <div class="metric">
+
+                        <div class="metric-label">
+                            THERMAL SIGNAL
+                        </div>
+
+                        <div
+                            class="metric-value"
+                            id="thermalValue"
+                        >
+                            --
+                        </div>
+
+                        <div class="metric-description">
+                            Thermal conditions detected in the
+                            selected region.
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric">
+
+                        <div class="metric-label">
+                            INDUSTRIAL PROXIMITY
+                        </div>
+
+                        <div
+                            class="metric-value"
+                            id="industrialValue"
+                        >
+                            --
+                        </div>
+
+                        <div class="metric-description">
+                            Potential exposure to industrial
+                            infrastructure.
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric">
+
+                        <div class="metric-label">
+                            POPULATION EXPOSURE
+                        </div>
+
+                        <div
+                            class="metric-value"
+                            id="populationValue"
+                        >
+                            --
+                        </div>
+
+                        <div class="metric-description">
+                            Nearby populated areas may increase
+                            consequence severity.
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric">
+
+                        <div class="metric-label">
+                            AI CONFIDENCE
+                        </div>
+
+                        <div
+                            class="metric-value"
+                            id="confidenceValue"
+                        >
+                            --
+                        </div>
+
+                        <div class="metric-description">
+                            Confidence based on available
+                            analysis signals.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-title">
+                        AI EXPLANATION
+                    </div>
+
+                    <div
+                        class="info-text"
+                        id="explanation"
+                    >
+                        No explanation available.
+                    </div>
+
+                </div>
+
+
+                <div class="response-box">
+
+                    <div class="info-title">
+                        RECOMMENDED RESPONSE
+                    </div>
+
+                    <div
+                        class="info-text"
+                        id="recommendedResponse"
+                    >
+                        No response recommendation available.
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /*
+         * =====================================================
+         * DISPLAY ERROR
+         * =====================================================
+         */
+
+        function displayError(
+            message
+        ) {
+
+            errorBox.textContent =
+                "Unable to complete AI analysis: " +
+                message;
+
+
+            errorBox.classList.add(
+                "show"
+            );
+
+
+            engineStatus.textContent =
+                "ERROR";
+
+        }
+
+
+        /*
+         * =====================================================
          * RUN AI ANALYSIS
+         * =====================================================
          */
 
         async function runAnalysis() {
 
             /*
-             * Clear previous error.
+             * Clear old error.
              */
 
-            errorBox.classList.remove("show");
-            errorBox.textContent = "";
+            errorBox.classList.remove(
+                "show"
+            );
+
+            errorBox.textContent =
+                "";
 
 
             /*
-             * Get user input BEFORE disabling anything.
+             * Read user input.
              */
 
             const situation =
-                situationInput.value.trim();
+                situationInput
+                    ? situationInput.value.trim()
+                    : "";
 
 
             const region =
-                regionInput.value;
+                regionInput
+                    ? regionInput.value
+                    : "Chennai";
 
 
             const mode =
-                modeInput.value;
+                modeInput
+                    ? modeInput.value
+                    : "thermal";
 
 
             /*
-             * Do not run empty requests.
+             * Validate.
              */
 
             if (!situation) {
 
-                errorBox.textContent =
-                    "Please describe the situation before running the analysis.";
+                displayError(
+                    "Please describe the situation before running the analysis."
+                );
 
-                errorBox.classList.add("show");
 
                 engineStatus.textContent =
                     "WAITING FOR INPUT";
 
-                situationInput.focus();
+
+                if (situationInput) {
+                    situationInput.focus();
+                }
+
 
                 return;
+
             }
 
 
             /*
-             * Disable button.
+             * Loading.
              */
 
-            runButton.disabled = true;
+            runButton.disabled =
+                true;
+
 
             runButton.textContent =
                 "ANALYZING...";
+
 
             engineStatus.textContent =
                 "ANALYZING";
 
 
+            showLoading();
+
+
             try {
 
+                console.log(
+                    "🔥 FireGuard analysis request:",
+                    {
+                        situation,
+                        region,
+                        mode
+                    }
+                );
+
+
                 /*
-                 * Your tested backend event.
-                 */
-
-                const eventId = "FG-001";
-
-
-                /*
-                 * Send request to Flask.
+                 * =================================================
+                 * API REQUEST
+                 * =================================================
+                 *
+                 * IMPORTANT:
+                 *
+                 * This now goes to:
+                 *
+                 * https://fireguardai-qsd4.onrender.com/api/analyze
+                 *
                  */
 
                 const response =
                     await fetch(
-                        API_BASE + "/api/analyze",
+                        `${API_BASE}/api/analyze`,
                         {
                             method: "POST",
 
                             headers: {
                                 "Content-Type":
+                                    "application/json",
+
+                                "Accept":
                                     "application/json"
                             },
 
-                            body: JSON.stringify({
-                                event_id: eventId,
-                                region: region,
-                                mode: mode,
-                                situation: situation
-                            })
+                            body:
+                                JSON.stringify({
+                                    event_id: "FG-001",
+                                    region:
+                                        region,
+                                    mode:
+                                        mode,
+                                    situation:
+                                        situation
+                                })
                         }
                     );
 
 
+                console.log(
+                    "🔥 FireGuard HTTP status:",
+                    response.status
+                );
+
+
                 /*
-                 * Read response safely.
+                 * Read response.
                  */
 
-                let data = {};
-
                 const contentType =
-                    response.headers.get("content-type") || "";
+                    response.headers.get(
+                        "content-type"
+                    ) || "";
 
-                if (contentType.includes("application/json")) {
+
+                let data;
+
+
+                if (
+                    contentType.includes(
+                        "application/json"
+                    )
+                ) {
 
                     data =
                         await response.json();
@@ -1565,6 +2209,7 @@
                     const text =
                         await response.text();
 
+
                     data = {
                         message: text
                     };
@@ -1573,28 +2218,28 @@
 
 
                 console.log(
-                    "FireGuard AI backend response:",
+                    "🔥 FireGuard backend response:",
                     data
                 );
 
 
                 /*
-                 * Handle HTTP errors.
+                 * HTTP failure.
                  */
 
                 if (!response.ok) {
 
                     throw new Error(
-                        data.message ||
                         data.error ||
-                        `AI analysis failed with HTTP ${response.status}.`
+                        data.message ||
+                        `Server returned HTTP ${response.status}.`
                     );
 
                 }
 
 
                 /*
-                 * Make sure backend says success.
+                 * Backend failure.
                  */
 
                 if (
@@ -1603,6 +2248,7 @@
                 ) {
 
                     throw new Error(
+                        data.error ||
                         data.message ||
                         "Backend returned an unsuccessful response."
                     );
@@ -1611,39 +2257,51 @@
 
 
                 /*
+                 * Restore result markup because
+                 * loading replaced it.
+                 */
+
+                restoreResultPanel();
+
+
+                /*
                  * Display result.
                  */
 
-                displayAnalysis(data);
+                displayAnalysis(
+                    data
+                );
 
-            }
 
-
-            catch (error) {
+            } catch (error) {
 
                 console.error(
-                    "FireGuard AI error:",
+                    "🔥 FireGuard AI error:",
                     error
                 );
 
 
-                errorBox.textContent =
-                    "Unable to complete AI analysis: " +
-                    error.message;
+                /*
+                 * Restore result markup.
+                 */
+
+                restoreResultPanel();
 
 
-                errorBox.classList.add("show");
+                /*
+                 * Show error.
+                 */
 
+                displayError(
+                    error.message ||
+                    "Unknown connection error."
+                );
 
-                engineStatus.textContent =
-                    "ERROR";
+            } finally {
 
-            }
+                runButton.disabled =
+                    false;
 
-
-            finally {
-
-                runButton.disabled = false;
 
                 runButton.textContent =
                     "RUN AI ANALYSIS →";
@@ -1654,66 +2312,103 @@
 
 
         /*
-         * Connect RUN button.
-         *
-         * This avoids relying on inline onclick handlers.
+         * =====================================================
+         * RUN BUTTON
+         * =====================================================
          */
 
-        runButton.addEventListener(
-            "click",
-            runAnalysis
-        );
+        if (runButton) {
 
-
-        /*
-         * Connect quick analysis buttons.
-         */
-
-        document
-            .querySelectorAll(".quick-button")
-            .forEach((button) => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const mode =
-                            button.dataset.mode;
-
-                        quickAnalysis(mode);
-
-                    }
-                );
-
-            });
-
-
-        /*
-         * Allow Ctrl + Enter inside textarea
-         * to run the analysis.
-         */
-
-        situationInput.addEventListener(
-            "keydown",
-            (event) => {
-
-                if (
-                    event.ctrlKey &&
-                    event.key === "Enter"
-                ) {
+            runButton.addEventListener(
+                "click",
+                function(event) {
 
                     event.preventDefault();
 
                     runAnalysis();
 
                 }
+            );
 
-            }
-        );
+
+            console.log(
+                "🔥 FireGuard AI Analyst button connected."
+            );
+
+        } else {
+
+            console.error(
+                "FireGuard: Run button not found."
+            );
+
+        }
 
 
         /*
-         * Check backend.
+         * =====================================================
+         * QUICK BUTTONS
+         * =====================================================
+         */
+
+        document
+            .querySelectorAll(
+                ".quick-button"
+            )
+            .forEach(
+                (button) => {
+
+                    button.addEventListener(
+                        "click",
+                        function() {
+
+                            const mode =
+                                this.dataset.mode;
+
+
+                            quickAnalysis(
+                                mode
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        /*
+         * =====================================================
+         * CTRL + ENTER
+         * =====================================================
+         */
+
+        if (situationInput) {
+
+            situationInput.addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (
+                        event.ctrlKey &&
+                        event.key === "Enter"
+                    ) {
+
+                        event.preventDefault();
+
+                        runAnalysis();
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /*
+         * =====================================================
+         * BACKEND HEALTH CHECK
+         * =====================================================
          */
 
         async function checkBackend() {
@@ -1721,34 +2416,57 @@
             engineStatus.textContent =
                 "CHECKING BACKEND";
 
+
             try {
+
+                console.log(
+                    "Checking backend:",
+                    `${API_BASE}/api/health`
+                );
+
 
                 const response =
                     await fetch(
-                        API_BASE + "/api/health"
+                        `${API_BASE}/api/health`,
+                        {
+                            method: "GET",
+                            cache: "no-store"
+                        }
                     );
 
 
-                if (response.ok) {
+                if (
+                    response.ok
+                ) {
 
                     engineStatus.textContent =
                         "READY";
+
+
+                    console.log(
+                        "🔥 FireGuard backend online."
+                    );
 
                 } else {
 
                     engineStatus.textContent =
                         "BACKEND ERROR";
 
+
+                    console.warn(
+                        "FireGuard backend health returned:",
+                        response.status
+                    );
+
                 }
 
-            }
-
-            catch (error) {
+            } catch (error) {
 
                 console.error(
                     "Backend health check failed:",
                     error
                 );
+
 
                 engineStatus.textContent =
                     "BACKEND OFFLINE";
@@ -1759,10 +2477,9 @@
 
 
         /*
-         * Load a query passed from index.html.
-         *
-         * This allows the landing-page analyst box
-         * to send its text to this page.
+         * =====================================================
+         * LOAD QUERY FROM HOMEPAGE
+         * =====================================================
          */
 
         function loadSavedAnalystQuery() {
@@ -1773,14 +2490,19 @@
                 );
 
 
-            if (savedQuery) {
+            if (
+                savedQuery &&
+                situationInput
+            ) {
 
                 situationInput.value =
                     savedQuery;
 
+
                 sessionStorage.removeItem(
                     "fireguardAnalystQuery"
                 );
+
 
                 situationInput.focus();
 
@@ -1790,8 +2512,28 @@
 
 
         /*
-         * Start page.
+         * =====================================================
+         * INITIALIZE
+         * =====================================================
          */
+
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            "       FIREGUARD AI ANALYST"
+        );
+
+        console.log(
+            "========================================"
+        );
+
+        console.log(
+            "Backend:",
+            API_BASE
+        );
+
 
         loadSavedAnalystQuery();
 

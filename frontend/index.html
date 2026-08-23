@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -16,6 +17,7 @@
     <title>FireGuard AI — Fire Intelligence</title>
 
     <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
@@ -450,6 +452,7 @@
                 <div class="event-title">
 
                     PROBABLE INDUSTRIAL
+
                     <span>THERMAL EVENT</span>
 
                 </div>
@@ -521,10 +524,12 @@
                     03 / AI ANALYST
                 </span>
 
+
                 <h2>
                     ASK THE
                     <span>INTELLIGENCE.</span>
                 </h2>
+
 
                 <p>
                     Investigate thermal events using
@@ -532,13 +537,29 @@
                 </p>
 
 
+                <!-- =================================================
+                     AI ANALYST QUERY INPUT
+                ================================================== -->
+
                 <div class="query-box">
 
-                    <span>
-                        "Show high-risk industrial events..."
-                    </span>
+                    <textarea
+                        id="analyst-query"
+                        class="analyst-query"
+                        name="analyst-query"
+                        rows="1"
+                        placeholder="Show high-risk industrial events..."
+                        aria-label="Describe the situation for AI analysis"
+                        autocomplete="off"
+                    ></textarea>
 
-                    <button type="button">
+
+                    <button
+                        type="button"
+                        id="analyst-run-button"
+                        aria-label="Run AI analysis"
+                        title="Run AI analysis"
+                    >
                         →
                     </button>
 

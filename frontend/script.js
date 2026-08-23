@@ -169,17 +169,127 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /*
        Find the Run AI Analysis button.
+
+       Supports:
+       - #runAnalysis
+       - #run-ai-analysis
+       - .run-analysis
+       - data-action buttons
+       - arrow buttons used by the current UI
     */
 
     let runButton =
         document.querySelector(
-            "#runAnalysis, #run-ai-analysis, .run-analysis"
+            "#runAnalysis, #run-ai-analysis, .run-analysis, " +
+            "[data-action='run-analysis'], " +
+            "[data-action='analyze']"
         );
 
 
     /*
        If the HTML does not have a specific ID/class,
-       find the button based on its text.
+       first try to find the button near the textarea.
+    */
+
+    if (!runButton && situationInput) {
+
+        /*
+           First try the closest form.
+        */
+
+        const form =
+            situationInput.closest("form");
+
+        if (form) {
+
+            const formButtons =
+                form.querySelectorAll("button");
+
+            if (formButtons.length > 0) {
+
+                runButton =
+                    Array.from(formButtons).find((button) => {
+
+                        const text =
+                            button.textContent
+                                .trim()
+                                .toLowerCase();
+
+                        return (
+                            text === "→" ||
+                            text === "➜" ||
+                            text.includes("run") ||
+                            text.includes("analyze") ||
+                            text.includes("analysis")
+                        );
+
+                    }) || formButtons[formButtons.length - 1];
+            }
+        }
+
+
+        /*
+           Try the nearest common analyst containers.
+        */
+
+        if (!runButton) {
+
+            const container =
+                situationInput.closest(
+                    ".analysis-input, " +
+                    ".analyst-input, " +
+                    ".input-group, " +
+                    ".analysis-form, " +
+                    ".analyst-form, " +
+                    ".analysis-query, " +
+                    ".query-form, " +
+                    ".analyst-section, " +
+                    ".analyst-panel, " +
+                    "section, " +
+                    ".container"
+                );
+
+            if (container) {
+
+                const buttons =
+                    container.querySelectorAll("button");
+
+                if (buttons.length > 0) {
+
+                    runButton =
+                        Array.from(buttons).find((button) => {
+
+                            const text =
+                                button.textContent
+                                    .trim()
+                                    .toLowerCase();
+
+                            return (
+                                text === "→" ||
+                                text === "➜" ||
+                                text === "➝" ||
+                                text === "⟶" ||
+                                text.includes("run ai analysis") ||
+                                text.includes("run analysis") ||
+                                text.includes("analyze") ||
+                                text.includes("analysis") ||
+                                text.includes("submit")
+                            );
+
+                        }) || buttons[buttons.length - 1];
+                }
+            }
+        }
+    }
+
+
+    /*
+       Final fallback.
+
+       The live FireGuard analyst interface currently
+       displays a simple white arrow button.
+
+       Search every button on the page.
     */
 
     if (!runButton) {
@@ -187,20 +297,68 @@ document.addEventListener("DOMContentLoaded", () => {
         const allButtons =
             document.querySelectorAll("button");
 
-        allButtons.forEach((button) => {
+        runButton =
+            Array.from(allButtons).find((button) => {
 
-            const text =
-                button.textContent
+                const text =
+                    button.textContent
+                        .trim()
+                        .toLowerCase();
+
+                const ariaLabel =
+                    (
+                        button.getAttribute("aria-label") ||
+                        ""
+                    )
                     .trim()
                     .toLowerCase();
 
-            if (
-                text.includes("run ai analysis") ||
-                text.includes("run analysis")
-            ) {
-                runButton = button;
-            }
-        });
+                const title =
+                    (
+                        button.getAttribute("title") ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                return (
+                    text === "→" ||
+                    text === "➜" ||
+                    text === "➝" ||
+                    text === "⟶" ||
+                    text.includes("run ai analysis") ||
+                    text.includes("run analysis") ||
+                    text.includes("analyze") ||
+                    text.includes("analysis") ||
+                    text.includes("submit") ||
+                    ariaLabel.includes("analyze") ||
+                    ariaLabel.includes("analysis") ||
+                    ariaLabel.includes("run") ||
+                    title.includes("analyze") ||
+                    title.includes("analysis") ||
+                    title.includes("run")
+                );
+
+            }) || null;
+    }
+
+
+    /*
+       Last-resort fallback:
+       If there is exactly one button on the analyst
+       page and we have an input, use that button.
+    */
+
+    if (!runButton && situationInput) {
+
+        const pageButtons =
+            document.querySelectorAll("button");
+
+        if (pageButtons.length === 1) {
+
+            runButton =
+                pageButtons[0];
+        }
     }
 
 
@@ -480,6 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
         */
 
         if (Array.isArray(explanation)) {
+
             explanation =
                 explanation.join(" ");
         }
@@ -1323,6 +1482,13 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(
             "Backend:",
             API_BASE
+        );
+
+        console.log(
+            "Analysis button:",
+            runButton
+                ? "CONNECTED"
+                : "NOT FOUND"
         );
     }
 

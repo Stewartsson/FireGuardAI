@@ -235,7 +235,6 @@ def load_alerts():
 
         return DEFAULT_ALERTS.copy()
 
-
     try:
 
         with open(
@@ -246,11 +245,9 @@ def load_alerts():
 
             data = json.load(file)
 
-
         if isinstance(data, list):
 
             return data
-
 
     except (
         json.JSONDecodeError,
@@ -258,7 +255,6 @@ def load_alerts():
     ):
 
         pass
-
 
     save_alerts(DEFAULT_ALERTS)
 
@@ -307,7 +303,6 @@ def find_event(event_id):
 
             return event
 
-
     return None
 
 
@@ -318,7 +313,6 @@ def find_alert(alert_id):
         if alert["id"] == alert_id:
 
             return alert
-
 
     return None
 
@@ -400,13 +394,11 @@ def build_analysis(event):
 
     event_type = event["type"]
 
-
     temperature_value = (
         get_temperature_number(
             temperature
         )
     )
-
 
     confidence_value = (
         get_confidence_number(
@@ -423,16 +415,13 @@ def build_analysis(event):
 
         threat_score = 92
 
-
     elif severity == "HIGH":
 
         threat_score = 78
 
-
     elif severity == "MODERATE":
 
         threat_score = 56
-
 
     else:
 
@@ -445,11 +434,9 @@ def build_analysis(event):
 
         threat_score += 3
 
-
     elif temperature_value >= 60:
 
         threat_score += 2
-
 
     elif temperature_value >= 55:
 
@@ -470,16 +457,13 @@ def build_analysis(event):
 
         industrial_proximity = "HIGH"
 
-
     elif severity == "HIGH":
 
         industrial_proximity = "HIGH"
 
-
     elif severity == "MODERATE":
 
         industrial_proximity = "MEDIUM"
-
 
     else:
 
@@ -494,16 +478,13 @@ def build_analysis(event):
 
         population_exposure = "HIGH"
 
-
     elif severity == "HIGH":
 
         population_exposure = "MEDIUM"
 
-
     elif severity == "MODERATE":
 
         population_exposure = "MEDIUM"
-
 
     else:
 
@@ -523,7 +504,6 @@ def build_analysis(event):
             f"is recommended."
         )
 
-
         explanation = (
             f"The detected {event_type.lower()} shows "
             f"a high-risk thermal signature in {region}. "
@@ -533,13 +513,11 @@ def build_analysis(event):
             f"as a critical operational priority."
         )
 
-
         recommendation = (
             "Prioritize field verification, confirm "
             "whether an active fire or industrial hazard "
             "is present, and maintain continuous monitoring."
         )
-
 
         priority = "IMMEDIATE"
 
@@ -554,7 +532,6 @@ def build_analysis(event):
             f"The signal requires enhanced observation."
         )
 
-
         explanation = (
             f"A high-severity thermal signal was detected "
             f"in {region}. The measured temperature is "
@@ -563,13 +540,11 @@ def build_analysis(event):
             f"are recommended."
         )
 
-
         recommendation = (
             "Continue monitoring the thermal signal, "
             "validate the location, and investigate "
             "for escalation or persistent heat activity."
         )
-
 
         priority = "HIGH"
 
@@ -585,7 +560,6 @@ def build_analysis(event):
             f"requirement."
         )
 
-
         explanation = (
             f"A moderate thermal signal has been detected "
             f"in {region}. The current temperature is "
@@ -594,12 +568,10 @@ def build_analysis(event):
             f"whether the signal is increasing."
         )
 
-
         recommendation = (
             "Continue observation and compare subsequent "
             "measurements for changes in thermal intensity."
         )
-
 
         priority = "MONITOR"
 
@@ -614,7 +586,6 @@ def build_analysis(event):
             f"No immediate escalation is indicated."
         )
 
-
         explanation = (
             f"A low-severity thermal signal was detected "
             f"in {region}. The current temperature is "
@@ -622,13 +593,11 @@ def build_analysis(event):
             f"Routine monitoring is appropriate."
         )
 
-
         recommendation = (
             "Maintain routine monitoring and verify that "
             "the signal continues to remain within "
             "expected conditions."
         )
-
 
         priority = "LOW"
 
@@ -1058,7 +1027,6 @@ def analyze():
 
             }), 404
 
-
     else:
 
         # Default event
@@ -1113,62 +1081,23 @@ if __name__ == "__main__":
     print("")
 
     print(
-        "Server: http://127.0.0.1:5000"
+        "FIREGUARD AI backend starting..."
     )
 
     print("")
 
-    print(
-        "Available endpoints:"
+    # Use the PORT supplied by the hosting platform.
+    # If no PORT exists, use 5000 for local development.
+
+    port = int(
+        os.environ.get(
+            "PORT",
+            5000
+        )
     )
-
-    print(
-        "  GET  /"
-    )
-
-    print(
-        "  GET  /api/health"
-    )
-
-    print(
-        "  GET  /api/events"
-    )
-
-    print(
-        "  GET  /api/events/<id>"
-    )
-
-    print(
-        "  GET  /api/alerts"
-    )
-
-    print(
-        "  POST /api/alerts/<id>/acknowledge"
-    )
-
-    print(
-        "  POST /api/alerts/<id>/reset"
-    )
-
-    print(
-        "  POST /api/analyze"
-    )
-
-    print("")
-
-    print(
-        "=============================================="
-    )
-
-    print("")
-
 
     app.run(
-
-        host="127.0.0.1",
-
-        port=5000,
-
-        debug=True
-
+        host="0.0.0.0",
+        port=port,
+        debug=False
     )

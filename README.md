@@ -262,18 +262,3 @@ They can now go directly from GitHub to:
 That makes the repository much more professional for your presentation/demo.
 
 ---
-
-# 👨‍💻 Developer
-
-**Developed by:**
-
-### Jeffisha A
-### John Stewartsson J R
-### Joshua Miracle J 
-### Mahalakshmi P
-### Namith S P
-### Narmathakavi C S
-
-🔥 FireGuardAI — AI-Powered Thermal Fire Detection & Risk Intelligence Platform
-
----
